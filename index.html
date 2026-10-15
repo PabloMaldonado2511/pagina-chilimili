@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chilimili</title>
+<meta name="description" content="Gomitas enchiladas y más. Elige tus gomitas, la fecha y el punto de entrega en Monterrey y zona metropolitana.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --negro: #0a0a0a;
+    --panel: #141414;
+    --campo: #1c1c1c;
+    --linea: #2a2a2a;
+    --blanco: #ffffff;
+    --gris: #a8a8a8;
+    --naranja: #f59a23;
+    --error: #ff6b5e;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--negro);
+    color: var(--blanco);
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+  /* Encabezado */
+  .encabezado { padding-top: calc(28px + env(safe-area-inset-top)); }
+  .marca {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(3.2rem, 18vw, 5.6rem);
+    letter-spacing: -0.035em;
+    line-height: 0.9;
+  }
+  .lema { margin: 10px 0 0; font-size: 1.15rem; color: var(--gris); }
+  .franja-caja { position: relative; height: 136px; margin: 22px -16px 8px; }
+  .franja {
+    position: absolute; left: 0; right: 0; top: 40px; height: 56px;
+    background: linear-gradient(to bottom,
+      #f6d32d 0 14.28%, #f59a23 0 28.57%, #e3342f 0 42.85%, #2fb34a 0 57.14%,
+      #25c5d6 0 71.42%, #3b6fe0 0 85.71%, #8e44e0 0 100%);
+  }
+  .circulos {
+    position: absolute; inset: 0;
+    display: flex; justify-content: center; align-items: center; gap: 14px;
+  }
+  .circulos img {
+    width: 112px; height: 112px; border-radius: 50%; object-fit: cover;
+    border: 4px solid var(--negro);
+  }
+  .aviso { margin: 14px 0 0; color: var(--gris); font-size: 0.98rem; max-width: 44ch; }
+  .aviso strong { color: var(--blanco); font-weight: 600; }
+
+  /* Menú */
+  .categoria { margin-top: 34px; }
+  .categoria h2 {
+    display: inline-block; margin: 0 0 6px; padding: 6px 16px;
+    border-radius: 999px; background: var(--c);
+    font-size: 1.15rem; font-weight: 800;
+  }
+  .producto {
+    display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--linea);
+  }
+  .foto {
+    width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block;
+    background: var(--campo);
+  }
+  .foto-vacia {
+    display: grid; place-items: center; font-size: 1.5rem; font-weight: 800;
+    color: var(--c); border: 2px solid var(--c); background: transparent;
+  }
+  .producto h3 { margin: 0 0 4px; font-size: 1.12rem; font-weight: 600; }
+  .linea { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .linea + .linea { margin-top: 8px; }
+  .precio { color: var(--gris); }
+  .precio b { color: var(--naranja); font-weight: 800; font-size: 1.1rem; }
+  .contador { display: flex; align-items: center; gap: 6px; }
+  .contador button {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1.5px solid #4a4a4a; background: transparent; color: var(--blanco);
+    font: inherit; font-size: 1.4rem; font-weight: 600; line-height: 1; cursor: pointer;
+  }
+  .contador button.mas { background: var(--naranja); border-color: var(--naranja); color: #000; }
+  .contador button:disabled { opacity: 0.3; cursor: default; }
+  .cantidad { min-width: 28px; text-align: center; font-weight: 800; font-size: 1.15rem; }
+
+  .pie { margin: 40px 0 0; color: var(--gris); font-size: 0.95rem; }
+  .pie a { color: var(--blanco); }
+
+  :focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+  /* Barra inferior */
+  .barra {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: var(--naranja); color: #000;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  .barra[hidden] { display: none; }
+  .barra-interior {
+    max-width: 560px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .barra-texto { font-weight: 600; line-height: 1.2; }
+  .barra-texto strong { display: block; font-size: 1.5rem; font-weight: 800; }
+  .barra button {
+    border: 0; border-radius: 999px; background: #000; color: #fff;
+    padding: 14px 22px; font: inherit; font-weight: 800; font-size: 1.05rem; cursor: pointer;
+  }
+  .barra :focus-visible { outline-color: #000; }
+
+  /* Hoja de pedido */
+  dialog {
+    width: min(100%, 560px); max-height: 94dvh; margin: auto auto 0;
+    border: 0; border-radius: 22px 22px 0 0; padding: 20px 16px 28px;
+    background: var(--panel); color: var(--blanco); overflow-y: auto;
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.72); }
+  .hoja-cabeza { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .hoja-cabeza h2 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+  .cerrar {
+    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #4a4a4a;
+    background: transparent; color: #fff; font: inherit; font-size: 1.3rem; cursor: pointer;
+  }
+  .resumen { list-style: none; margin: 0 0 6px; padding: 0; }
+  .resumen li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--linea);
+  }
+  .resumen .total { border-bottom: 0; font-weight: 800; font-size: 1.2rem; }
+  .resumen .total span:last-child { color: var(--naranja); }
+  form { margin-top: 14px; display: grid; gap: 14px; }
+  label { display: block; font-weight: 600; font-size: 0.98rem; }
+  .ayuda { display: block; margin-top: 2px; font-weight: 400; color: var(--gris); font-size: 0.9rem; }
+  input, textarea {
+    display: block; width: 100%; margin-top: 6px; padding: 12px 14px;
+    background: var(--campo); color: #fff; border: 1.5px solid #3a3a3a; border-radius: 12px;
+    font: inherit; font-size: 16px;
+  }
+  textarea { min-height: 76px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible { outline: 3px solid var(--naranja); outline-offset: 1px; }
+  input[type="date"] { min-height: 48px; }
+  .enviar {
+    margin-top: 4px; width: 100%; border: 0; border-radius: 999px;
+    background: var(--naranja); color: #000; padding: 16px;
+    font: inherit; font-weight: 800; font-size: 1.1rem; cursor: pointer;
+  }
+  .nota-envio { margin: 0; color: var(--gris); font-size: 0.92rem; }
+  .resultado { margin-top: 16px; padding: 14px; border-radius: 14px; background: var(--campo); }
+  .resultado[hidden] { display: none; }
+  .resultado p { margin: 0 0 10px; }
+  .resultado textarea { min-height: 150px; margin-top: 0; font-size: 14px; }
+  .error { color: var(--error); font-weight: 600; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .contador button { transition: transform 0.12s ease; }
+    .contador button:active:not(:disabled) { transform: scale(0.92); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="encabezado">
+    <h1 class="marca">Chilimili</h1>
+    <p class="lema">Gomitas enchiladas y más…</p>
+    <div class="franja-caja" aria-hidden="true">
+      <div class="franja"></div>
+      <div class="circulos">
+        <img src="img/aros.jpg" alt="" width="112" height="112">
+        <img src="img/sandias.jpg" alt="" width="112" height="112">
+        <img src="img/gusanitos.jpg" alt="" width="112" height="112">
+      </div>
+    </div>
+    <p class="aviso" id="aviso"></p>
+  </header>
+
+  <div id="menu"></div>
+  <noscript><p class="error">Esta página necesita JavaScript para armar tu pedido.</p></noscript>
+
+  <p class="pie" id="pie"></p>
+</main>
+
+<div class="barra" id="barra" hidden>
+  <div class="barra-interior">
+    <div class="barra-texto"><span id="barra-cuenta"></span><strong id="barra-total"></strong></div>
+    <button type="button" id="abrir">Ver mi pedido</button>
+  </div>
+</div>
+
+<dialog id="hoja" aria-labelledby="hoja-titulo">
+  <div class="hoja-cabeza">
+    <h2 id="hoja-titulo">Tu pedido</h2>
+    <button type="button" class="cerrar" id="cerrar" aria-label="Cerrar">✕</button>
+  </div>
+  <ul class="resumen" id="resumen"></ul>
+
+  <form id="formulario" novalidate>
+    <label>Nombre
+      <input name="nombre" type="text" autocomplete="name" required>
+    </label>
+    <label>WhatsApp o Instagram
+      <span class="ayuda">Para confirmar tu pedido.</span>
+      <input name="contacto" type="text" autocomplete="off" required>
+    </label>
+    <label>Fecha de entrega
+      <span class="ayuda" id="ayuda-fecha"></span>
+      <input name="fecha" type="date" id="fecha" required>
+    </label>
+    <label>Punto de entrega
+      <span class="ayuda" id="ayuda-punto"></span>
+      <input name="punto" type="text" autocomplete="off" required>
+    </label>
+    <label>Notas (opcional)
+      <textarea name="notas"></textarea>
+    </label>
+    <button type="submit" class="enviar">Enviar pedido por Instagram</button>
+    <p class="nota-envio">Se copia tu pedido y se abre el mensaje directo de Instagram. Solo pégalo y envíalo. La forma de pago se confirma por ahí.</p>
+  </form>
+
+  <div class="resultado" id="resultado" hidden>
+    <p id="resultado-texto" role="status"></p>
+    <textarea id="resultado-pedido" readonly aria-label="Texto de tu pedido"></textarea>
+  </div>
+</dialog>
+
+<script src="productos.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const dinero = (n) => "$" + n.toLocaleString("es-MX");
+  const tamanos = TAMANOS.filter((t) => t.activo).map((t) => t.g);
+  const carrito = new Map(); // clave -> { producto, g, precio, cant }
+
+  function el(tag, props = {}, ...hijos) {
+    const nodo = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "class") nodo.className = v;
+      else if (k === "text") nodo.textContent = v;
+      else nodo.setAttribute(k, v);
+    }
+    hijos.forEach((h) => h && nodo.append(h));
+    return nodo;
+  }
+
+  const lineas = []; // para refrescar contadores
+  function pintarMenu() {
+    const menu = $("menu");
+    for (const cat of CATEGORIAS) {
+      const prods = PRODUCTOS.filter((p) => p.categoria === cat.id);
+      if (!prods.length) continue;
+      const seccion = el("section", { class: "categoria", style: "--c:" + cat.color });
+      seccion.append(el("h2", { text: cat.nombre }));
+      for (const p of prods) {
+        const disponibles = tamanos.filter((g) => typeof p.precios[g] === "number");
+        if (!disponibles.length) continue;
+        const foto = p.foto
+          ? el("img", { class: "foto", src: p.foto, alt: "", loading: "lazy", width: "64", height: "64" })
+          : el("div", { class: "foto foto-vacia", "aria-hidden": "true", text: p.nombre[0] });
+        const info = el("div", {}, el("h3", { text: p.nombre }));
+        for (const g of disponibles) info.append(pintarLinea(p, g));
+        seccion.append(el("article", { class: "producto" }, foto, info));
+      }
+      menu.append(seccion);
+    }
+  }
+
+  function pintarLinea(p, g) {
+    const precio = p.precios[g];
+    const clave = p.id + "-" + g;
+    const cantidad = el("output", { class: "cantidad", text: "0", "aria-live": "polite" });
+    const menos = el("button", { type: "button", "aria-label": "Quitar uno: " + p.nombre + " " + g + " g", text: "−", disabled: "" });
+    const mas = el("button", { type: "button", class: "mas", "aria-label": "Agregar uno: " + p.nombre + " " + g + " g", text: "+" });
+    const fila = el("div", { class: "linea" },
+      el("span", { class: "precio" }, document.createTextNode(g + " g · "), el("b", { text: dinero(precio) })),
+      el("div", { class: "contador" }, menos, cantidad, mas));
+    const cambiar = (d) => {
+      const actual = carrito.get(clave) || { producto: p, g, precio, cant: 0 };
+      actual.cant = Math.max(0, Math.min(99, actual.cant + d));
+      if (actual.cant === 0) carrito.delete(clave); else carrito.set(clave, actual);
+      cantidad.textContent = String(actual.cant);
+      menos.disabled = actual.cant === 0;
+      refrescar();
+    };
+    menos.addEventListener("click", () => cambiar(-1));
+    mas.addEventListener("click", () => cambiar(1));
+    return fila;
+  }
+
+  function totales() {
+    let piezas = 0, total = 0;
+    for (const i of carrito.values()) { piezas += i.cant; total += i.cant * i.precio; }
+    return { piezas, total };
+  }
+
+  function refrescar() {
+    const { piezas, total } = totales();
+    $("barra").hidden = piezas === 0;
+    $("barra-cuenta").textContent = piezas === 1 ? "1 bolsa" : piezas + " bolsas";
+    $("barra-total").textContent = dinero(total);
+    if (piezas === 0 && $("hoja").open) $("hoja").close();
+    pintarResumen();
+  }
+
+  function pintarResumen() {
+    const lista = $("resumen");
+    lista.replaceChildren();
+    for (const i of carrito.values()) {
+      lista.append(el("li", {},
+        el("span", { text: i.cant + " × " + i.producto.nombre + " " + i.g + " g" }),
+        el("span", { text: dinero(i.cant * i.precio) })));
+    }
+    lista.append(el("li", { class: "total" }, el("span", { text: "Total" }), el("span", { text: dinero(totales().total) })));
+  }
+
+  function fechaISO(d) {
+    const z = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate());
+  }
+  function fechaLegible(iso) {
+    const [a, m, d] = iso.split("-").map(Number);
+    return new Date(a, m - 1, d).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
+  }
+
+  function textoPedido(datos) {
+    const lineasTxt = [...carrito.values()].map(
+      (i) => "• " + i.cant + " × " + i.producto.nombre + " " + i.g + " g — " + dinero(i.cant * i.precio));
+    const partes = [
+      "Pedido Chilimili",
+      ...lineasTxt,
+      "Total: " + dinero(totales().total),
+      "",
+      "Nombre: " + datos.nombre.trim(),
+      "Contacto: " + datos.contacto.trim(),
+      "Entrega: " + fechaLegible(datos.fecha) + " en " + datos.punto.trim(),
+    ];
+    if (datos.notas.trim()) partes.push("Notas: " + datos.notas.trim());
+    partes.push("Forma de pago: por confirmar");
+    return partes.join("\n");
+  }
+
+  function iniciar() {
+    $("aviso").append(
+      document.createTextNode("Entregamos en " + CONFIG.zona + ". Pide con "),
+      el("strong", { text: CONFIG.diasRecomendados + " días" }),
+      document.createTextNode(" de anticipación (mínimo 1)."));
+    const enlace = el("a", { href: "https://instagram.com/" + CONFIG.instagram, text: "@" + CONFIG.instagram });
+    $("pie").append(document.createTextNode("Dudas y pedidos especiales: "), enlace, document.createTextNode(" en Instagram."));
+    $("ayuda-fecha").textContent = "Lo ideal es con " + CONFIG.diasRecomendados + " días de anticipación.";
+    $("ayuda-punto").textContent = "¿Dónde te queda bien recibirlos? (" + CONFIG.zona + ")";
+
+    const manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    $("fecha").min = fechaISO(manana);
+
+    pintarMenu();
+    refrescar();
+
+    const hoja = $("hoja");
+    $("abrir").addEventListener("click", () => { $("resultado").hidden = true; hoja.showModal(); });
+    $("cerrar").addEventListener("click", () => hoja.close());
+    hoja.addEventListener("click", (e) => { if (e.target === hoja) hoja.close(); });
+
+    $("formulario").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const f = e.currentTarget;
+      if (!f.reportValidity()) return;
+      if (totales().piezas === 0) return;
+      const datos = Object.fromEntries(new FormData(f));
+      const texto = textoPedido(datos);
+      const copia = navigator.clipboard && navigator.clipboard.writeText
+        ? navigator.clipboard.writeText(texto) : Promise.reject();
+      window.open("https://ig.me/m/" + CONFIG.instagram, "_blank", "noopener");
+      const area = $("resultado-pedido");
+      area.value = texto;
+      $("resultado").hidden = false;
+      copia.then(
+        () => { $("resultado-texto").textContent = "Pedido copiado. Pégalo en el mensaje de Instagram y envíalo."; },
+        () => { $("resultado-texto").textContent = "No pudimos copiarlo solo. Copia este texto y envíalo por Instagram."; area.focus(); area.select(); });
+      $("resultado").scrollIntoView({ block: "nearest" });
+    });
+  }
+
+  iniciar();
+})();
+</script>
+</body>
+</html>
