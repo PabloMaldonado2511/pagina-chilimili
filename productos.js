@@ -1,12 +1,28 @@
 // ============================================================
-// Aquí se editan productos, precios y tamaños de Chilimili.
-// Los precios son en pesos mexicanos (MXN).
+// Aquí se editan productos, precios y datos del negocio.
+// Precios en pesos mexicanos (MXN).
+// Este archivo es público: nunca pongas aquí contraseñas ni claves.
 // ============================================================
 
 const CONFIG = {
   instagram: "chilimili_mty",
   diasRecomendados: "2 a 3",
   zona: "Monterrey y zona metropolitana",
+
+  // Dirección de la hoja de pedidos (Google Apps Script), termina en /exec.
+  // Vacío: la página manda el pedido como mensaje de Instagram.
+  pedidosUrl: "",
+
+  // WhatsApp del negocio que recibe los comprobantes: 10 dígitos, sin espacios.
+  // Vacío: la pantalla final no muestra el botón de WhatsApp.
+  whatsapp: "",
+
+  // Datos para pagar por transferencia. Sin banco y CLABE no se muestra la caja de pago.
+  pago: { banco: "", titular: "", clabe: "" },
+
+  // Puntos de entrega, por ejemplo ["Gimnasio X · lunes y miércoles"].
+  // Con la lista vacía, el cliente escribe dónde le queda bien.
+  puntos: [],
 };
 
 // Un tamaño aparece en la página solo si "activo" es true
@@ -19,9 +35,9 @@ const TAMANOS = [
 ];
 
 const CATEGORIAS = [
-  { id: "gomitas", nombre: "Gomitas", color: "#8e44e0" },
-  { id: "xtremes", nombre: "Xtremes", color: "#3b8ee6" },
-  { id: "skittles", nombre: "Skittles", color: "#1f9d45" },
+  { id: "gomitas", nombre: "Gomitas" },
+  { id: "xtremes", nombre: "Xtremes" },
+  { id: "skittles", nombre: "Skittles" },
 ];
 
 // precios: { tamaño en gramos: precio }. null = todavía sin precio.

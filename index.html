@@ -4,167 +4,183 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Chilimili</title>
-<meta name="description" content="Gomitas enchiladas y más. Elige tus gomitas, la fecha y el punto de entrega en Monterrey y zona metropolitana.">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Gomitas enchiladas en Monterrey. Elige tus gomitas, la fecha y el punto de entrega.">
+<meta name="theme-color" content="#0B0B0B">
+<link rel="icon" type="image/png" href="img/icono-192.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chilimili · Gomitas enchiladas">
+<meta property="og:description" content="Elige tus gomitas favoritas y pide desde tu celular.">
+<meta property="og:image" content="https://pablomaldonado2511.github.io/pagina-chilimili/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  /* Marca Chilimili: cabecera oscura con el logo, hoja crema con el menú, naranja solo para acciones. */
   :root {
-    --negro: #0a0a0a;
-    --panel: #141414;
-    --campo: #1c1c1c;
-    --linea: #2a2a2a;
-    --blanco: #ffffff;
-    --gris: #a8a8a8;
-    --naranja: #f59a23;
-    --error: #ff6b5e;
+    --negro: #0B0B0B;
+    --crema: #F7F3EB;
+    --naranja: #FF6B00;
+    --morado: #7A3FF2;
+    --tinta: #1E1E1E;
+    --rojo: #D7263D;
+    --tinta-suave: #6A655E;
+    --crema-suave: #CFC8BC;
+    --linea: #E2DBCE;
+    --titulo: "Baloo 2", "Arial Rounded MT Bold", system-ui, sans-serif;
+    --texto: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; background: var(--negro); }
   body {
     margin: 0;
     background: var(--negro);
-    color: var(--blanco);
-    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-weight: 400;
-    line-height: 1.4;
-    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+    color: var(--crema);
+    font-family: var(--texto);
+    line-height: 1.45;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
-  main { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 3px solid var(--naranja); outline-offset: 3px; }
 
-  /* Encabezado */
-  .encabezado { padding-top: calc(28px + env(safe-area-inset-top)); }
-  .marca {
-    margin: 0;
-    font-weight: 800;
-    font-size: clamp(3.2rem, 18vw, 5.6rem);
-    letter-spacing: -0.035em;
-    line-height: 0.9;
+  /* Cabecera */
+  .hero {
+    max-width: 560px; margin: 0 auto; text-align: center;
+    padding: 28px max(16px, env(safe-area-inset-left, 0px)) 26px max(16px, env(safe-area-inset-right, 0px));
   }
-  .lema { margin: 10px 0 0; font-size: 1.15rem; color: var(--gris); }
-  .franja-caja { position: relative; height: 136px; margin: 22px -16px 8px; }
-  .franja {
-    position: absolute; left: 0; right: 0; top: 40px; height: 56px;
-    background: linear-gradient(to bottom,
-      #f6d32d 0 14.28%, #f59a23 0 28.57%, #e3342f 0 42.85%, #2fb34a 0 57.14%,
-      #25c5d6 0 71.42%, #3b6fe0 0 85.71%, #8e44e0 0 100%);
-  }
-  .circulos {
-    position: absolute; inset: 0;
-    display: flex; justify-content: center; align-items: center; gap: 14px;
-  }
-  .circulos img {
-    width: 112px; height: 112px; border-radius: 50%; object-fit: cover;
-    border: 4px solid var(--negro);
-  }
-  .aviso { margin: 14px 0 0; color: var(--gris); font-size: 0.98rem; max-width: 44ch; }
-  .aviso strong { color: var(--blanco); font-weight: 600; }
+  .hero h1 { margin: 0; }
+  .logo { display: block; width: min(74vw, 300px); height: auto; margin: 0 auto; }
+  .lema { margin: 14px 0 0; font-family: var(--titulo); font-weight: 700; font-size: 1.5rem; line-height: 1.2; }
+  .entrega { margin: 8px auto 0; max-width: 34ch; color: var(--crema-suave); font-size: 0.95rem; }
+  .entrega strong { color: var(--crema); font-weight: 700; }
+
+  .arcoiris { height: 6px; background: linear-gradient(90deg, #7A3FF2, #2F7BFF, #1FB04B, #FFD400, #FF6B00, #D7263D); }
 
   /* Menú */
-  .categoria { margin-top: 34px; }
-  .categoria h2 {
-    display: inline-block; margin: 0 0 6px; padding: 6px 16px;
-    border-radius: 999px; background: var(--c);
-    font-size: 1.15rem; font-weight: 800;
+  .hoja-menu { background: var(--crema); color: var(--tinta); color-scheme: light; }
+  .hoja-menu :focus-visible, dialog :focus-visible { outline-color: var(--tinta); }
+  .menu {
+    max-width: 560px; margin: 0 auto;
+    padding: 28px max(16px, env(safe-area-inset-left, 0px)) 36px max(16px, env(safe-area-inset-right, 0px));
+  }
+  .titulo-menu { margin: 0; font-family: var(--titulo); font-weight: 800; font-size: 1.7rem; line-height: 1.15; text-wrap: balance; }
+  .categoria { margin-top: 26px; }
+  .categoria h3 {
+    display: inline-block; margin: 0 0 4px; padding: 5px 16px 1px; border-radius: 999px;
+    background: var(--morado); color: var(--crema);
+    font-family: var(--titulo); font-weight: 800; font-size: 1.1rem; line-height: 1.4;
   }
   .producto {
-    display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center;
+    display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: center;
     padding: 14px 0; border-bottom: 1px solid var(--linea);
   }
-  .foto {
-    width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block;
-    background: var(--campo);
-  }
+  .producto:last-child { border-bottom: 0; }
+  .foto { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: block; background: #E9E2D4; }
   .foto-vacia {
-    display: grid; place-items: center; font-size: 1.5rem; font-weight: 800;
-    color: var(--c); border: 2px solid var(--c); background: transparent;
+    display: grid; place-items: center; background: #EDE6F9; color: var(--morado);
+    font-family: var(--titulo); font-weight: 800; font-size: 1.7rem; line-height: 1;
   }
-  .producto h3 { margin: 0 0 4px; font-size: 1.12rem; font-weight: 600; }
+  .producto h4 { margin: 0 0 2px; font-family: var(--titulo); font-weight: 700; font-size: 1.2rem; line-height: 1.2; }
   .linea { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .linea + .linea { margin-top: 8px; }
-  .precio { color: var(--gris); }
-  .precio b { color: var(--naranja); font-weight: 800; font-size: 1.1rem; }
-  .contador { display: flex; align-items: center; gap: 6px; }
+  .precio { display: flex; align-items: baseline; gap: 8px; }
+  .gramos { font-size: 0.9rem; font-weight: 500; color: var(--tinta-suave); }
+  .monto { font-family: var(--titulo); font-weight: 800; font-size: 1.25rem; }
+  .contador { display: flex; align-items: center; gap: 4px; }
   .contador button {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 1.5px solid #4a4a4a; background: transparent; color: var(--blanco);
-    font: inherit; font-size: 1.4rem; font-weight: 600; line-height: 1; cursor: pointer;
+    width: 44px; height: 44px; padding: 0; display: grid; place-items: center;
+    border-radius: 50%; border: 2px solid var(--tinta); background: transparent; color: var(--tinta);
+    font: inherit; font-size: 1.5rem; font-weight: 700; line-height: 1; cursor: pointer;
   }
-  .contador button.mas { background: var(--naranja); border-color: var(--naranja); color: #000; }
-  .contador button:disabled { opacity: 0.3; cursor: default; }
-  .cantidad { min-width: 28px; text-align: center; font-weight: 800; font-size: 1.15rem; }
+  .contador .mas { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+  .contador button:disabled { opacity: 0.28; cursor: default; }
+  .cantidad { min-width: 30px; text-align: center; font-family: var(--titulo); font-weight: 800; font-size: 1.3rem; }
 
-  .pie { margin: 40px 0 0; color: var(--gris); font-size: 0.95rem; }
-  .pie a { color: var(--blanco); }
+  /* Pie */
+  .pie {
+    max-width: 560px; margin: 0 auto; text-align: center; color: var(--crema-suave);
+    padding: 30px max(16px, env(safe-area-inset-left, 0px)) 8px max(16px, env(safe-area-inset-right, 0px));
+  }
+  .pie p { margin: 0; }
+  .pie .grato { font-family: var(--titulo); font-weight: 700; font-size: 1.3rem; color: var(--crema); margin-bottom: 6px; }
+  .pie a { color: var(--crema); }
 
-  :focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-
-  /* Barra inferior */
+  /* Barra del pedido */
   .barra {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-    background: var(--naranja); color: #000;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--naranja); color: var(--negro);
+    padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   }
-  .barra[hidden] { display: none; }
-  .barra-interior {
-    max-width: 560px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  }
-  .barra-texto { font-weight: 600; line-height: 1.2; }
-  .barra-texto strong { display: block; font-size: 1.5rem; font-weight: 800; }
+  .barra :focus-visible { outline-color: var(--negro); }
+  .barra-interior { max-width: 560px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .barra-texto { font-weight: 700; line-height: 1.1; }
+  .barra-texto strong { display: block; font-family: var(--titulo); font-weight: 800; font-size: 1.6rem; }
   .barra button {
-    border: 0; border-radius: 999px; background: #000; color: #fff;
-    padding: 14px 22px; font: inherit; font-weight: 800; font-size: 1.05rem; cursor: pointer;
+    border: 0; border-radius: 999px; background: var(--negro); color: var(--crema);
+    padding: 14px 22px; font: inherit; font-weight: 700; font-size: 1.02rem; cursor: pointer;
   }
-  .barra :focus-visible { outline-color: #000; }
+  .barra button:focus-visible { outline-color: var(--tinta); outline-offset: 3px; }
 
   /* Hoja de pedido */
   dialog {
-    width: min(100%, 560px); max-height: 94dvh; margin: auto auto 0;
-    border: 0; border-radius: 22px 22px 0 0; padding: 20px 16px 28px;
-    background: var(--panel); color: var(--blanco); overflow-y: auto;
+    width: min(100%, 560px); max-height: 94dvh; margin: auto auto 0; border: 0;
+    border-radius: 24px 24px 0 0; background: var(--crema); color: var(--tinta); color-scheme: light;
+    padding: 20px max(16px, env(safe-area-inset-left, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px));
+    overflow-y: auto;
   }
-  dialog::backdrop { background: rgba(0, 0, 0, 0.72); }
-  .hoja-cabeza { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .hoja-cabeza h2 { margin: 0; font-size: 1.5rem; font-weight: 800; }
+  dialog::backdrop { background: rgba(11, 11, 11, 0.72); }
+  .hoja-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .hoja-cabeza h2, .listo h2 { margin: 0; font-family: var(--titulo); font-weight: 800; font-size: 1.7rem; line-height: 1.15; }
   .cerrar {
-    width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid #4a4a4a;
-    background: transparent; color: #fff; font: inherit; font-size: 1.3rem; cursor: pointer;
+    flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--tinta);
+    background: transparent; color: var(--tinta); font: inherit; font-size: 1.2rem; font-weight: 700; cursor: pointer;
   }
   .resumen { list-style: none; margin: 0 0 6px; padding: 0; }
-  .resumen li {
-    display: flex; justify-content: space-between; gap: 12px;
-    padding: 9px 0; border-bottom: 1px solid var(--linea);
-  }
-  .resumen .total { border-bottom: 0; font-weight: 800; font-size: 1.2rem; }
-  .resumen .total span:last-child { color: var(--naranja); }
+  .resumen li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--linea); }
+  .resumen .total { border-bottom: 0; font-family: var(--titulo); font-weight: 800; font-size: 1.35rem; }
   form { margin-top: 14px; display: grid; gap: 14px; }
-  label { display: block; font-weight: 600; font-size: 0.98rem; }
-  .ayuda { display: block; margin-top: 2px; font-weight: 400; color: var(--gris); font-size: 0.9rem; }
-  input, textarea {
-    display: block; width: 100%; margin-top: 6px; padding: 12px 14px;
-    background: var(--campo); color: #fff; border: 1.5px solid #3a3a3a; border-radius: 12px;
+  label { display: block; font-weight: 700; font-size: 0.98rem; }
+  .ayuda { display: block; margin-top: 2px; font-weight: 400; color: var(--tinta-suave); font-size: 0.9rem; }
+  input, select, textarea {
+    display: block; width: 100%; min-height: 48px; margin-top: 6px; padding: 12px 14px;
+    background: #fff; color: var(--tinta); border: 1.5px solid #CFC6B6; border-radius: 12px;
     font: inherit; font-size: 16px;
   }
   textarea { min-height: 76px; resize: vertical; }
-  input:focus-visible, textarea:focus-visible { outline: 3px solid var(--naranja); outline-offset: 1px; }
-  input[type="date"] { min-height: 48px; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--tinta); outline-offset: 1px; }
+  .nota summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 700; text-decoration: underline; }
+  .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
   .enviar {
-    margin-top: 4px; width: 100%; border: 0; border-radius: 999px;
-    background: var(--naranja); color: #000; padding: 16px;
-    font: inherit; font-weight: 800; font-size: 1.1rem; cursor: pointer;
+    display: block; width: 100%; border: 0; border-radius: 999px; padding: 15px 16px 13px; text-align: center; text-decoration: none;
+    background: var(--naranja); color: var(--negro); font-family: var(--titulo); font-weight: 800; font-size: 1.25rem; line-height: 1.3; cursor: pointer;
   }
-  .nota-envio { margin: 0; color: var(--gris); font-size: 0.92rem; }
-  .resultado { margin-top: 16px; padding: 14px; border-radius: 14px; background: var(--campo); }
-  .resultado[hidden] { display: none; }
-  .resultado p { margin: 0 0 10px; }
-  .resultado textarea { min-height: 150px; margin-top: 0; font-size: 14px; }
-  .enlace-ig {
-    display: block; margin-top: 12px; padding: 14px; border-radius: 999px; text-align: center;
-    background: var(--naranja); color: #000; font-weight: 800; text-decoration: none;
+  .enviar:disabled { opacity: 0.6; cursor: default; }
+  .secundario {
+    display: block; width: 100%; margin-top: 10px; min-height: 48px; border: 2px solid var(--tinta); border-radius: 999px;
+    background: transparent; color: var(--tinta); font: inherit; font-weight: 700; cursor: pointer;
   }
-  .error { color: var(--error); font-weight: 600; }
+  .nota-envio { margin: 0; color: var(--tinta-suave); font-size: 0.92rem; }
+  .error { margin: 0; color: var(--rojo); font-weight: 700; }
+  .respaldo { margin-top: 16px; padding: 14px; border-radius: 14px; background: #fff; border: 1.5px solid #CFC6B6; }
+  .respaldo p { margin: 0 0 10px; }
+  .respaldo textarea { min-height: 150px; margin-top: 0; font-size: 14px; }
+  .respaldo a { display: block; margin-top: 12px; }
+
+  /* Pedido recibido */
+  .listo { display: grid; gap: 14px; }
+  .folio { margin: 0; font-family: var(--titulo); font-weight: 700; font-size: 1.15rem; color: var(--morado); }
+  .listo p { margin: 0; }
+  .datos-pago { margin: 0; padding: 14px; border-radius: 14px; background: #fff; border: 2px solid var(--tinta); display: grid; gap: 10px; }
+  .datos-pago div { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .datos-pago dt { color: var(--tinta-suave); font-size: 0.92rem; }
+  .datos-pago dd { margin: 0; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+  .datos-pago .clabe { font-family: var(--titulo); font-weight: 800; font-size: 1.15rem; letter-spacing: 0.02em; }
+  .copiar {
+    margin-left: 8px; min-height: 36px; padding: 0 12px; border: 2px solid var(--tinta); border-radius: 999px;
+    background: transparent; color: var(--tinta); font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  }
 
   @media (prefers-reduced-motion: no-preference) {
     .contador button { transition: transform 0.12s ease; }
@@ -173,26 +189,25 @@
 </style>
 </head>
 <body>
-<main>
-  <header class="encabezado">
-    <h1 class="marca">Chilimili</h1>
-    <p class="lema">Gomitas enchiladas y más…</p>
-    <div class="franja-caja" aria-hidden="true">
-      <div class="franja"></div>
-      <div class="circulos">
-        <img src="img/aros.jpg" alt="" width="112" height="112">
-        <img src="img/sandias.jpg" alt="" width="112" height="112">
-        <img src="img/gusanitos.jpg" alt="" width="112" height="112">
-      </div>
-    </div>
-    <p class="aviso" id="aviso"></p>
-  </header>
+<header class="hero">
+  <h1><img class="logo" src="img/logo.webp" width="700" height="510" alt="Chilimili" fetchpriority="high"></h1>
+  <p class="lema">Gomitas enchiladas</p>
+  <p class="entrega" id="aviso"></p>
+</header>
+<div class="arcoiris" aria-hidden="true"></div>
 
-  <div id="menu"></div>
-  <noscript><p class="error">Esta página necesita JavaScript para armar tu pedido.</p></noscript>
+<div class="hoja-menu">
+  <main class="menu">
+    <h2 class="titulo-menu">Elige tus gomitas favoritas</h2>
+    <div id="menu"></div>
+    <noscript><p class="error">Esta página necesita JavaScript para armar tu pedido.</p></noscript>
+  </main>
+</div>
 
-  <p class="pie" id="pie"></p>
-</main>
+<footer class="pie">
+  <p class="grato">Tu antojo nos hace felices</p>
+  <p id="pie"></p>
+</footer>
 
 <div class="barra" id="barra" hidden>
   <div class="barra-interior">
@@ -202,40 +217,58 @@
 </div>
 
 <dialog id="hoja" aria-labelledby="hoja-titulo">
-  <div class="hoja-cabeza">
-    <h2 id="hoja-titulo">Tu pedido</h2>
-    <button type="button" class="cerrar" id="cerrar" aria-label="Cerrar">✕</button>
-  </div>
-  <ul class="resumen" id="resumen"></ul>
+  <section id="vista-pedido">
+    <div class="hoja-cabeza">
+      <h2 id="hoja-titulo">Tu pedido</h2>
+      <button type="button" class="cerrar" id="cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <ul class="resumen" id="resumen"></ul>
 
-  <form id="formulario" novalidate>
-    <label>Nombre
-      <input name="nombre" type="text" autocomplete="name" required>
-    </label>
-    <label>WhatsApp o Instagram
-      <span class="ayuda">Para confirmar tu pedido.</span>
-      <input name="contacto" type="text" autocomplete="off" required>
-    </label>
-    <label>Fecha de entrega
-      <span class="ayuda" id="ayuda-fecha"></span>
-      <input name="fecha" type="date" id="fecha" required>
-    </label>
-    <label>Punto de entrega
-      <span class="ayuda" id="ayuda-punto"></span>
-      <input name="punto" type="text" autocomplete="off" required>
-    </label>
-    <label>Notas (opcional)
-      <textarea name="notas"></textarea>
-    </label>
-    <button type="submit" class="enviar">Enviar pedido por Instagram</button>
-    <p class="nota-envio">Se copia tu pedido y se abre el mensaje directo de Instagram. Solo pégalo y envíalo. La forma de pago se confirma por ahí.</p>
-  </form>
+    <form id="formulario" novalidate>
+      <label for="nombre">Nombre
+        <input id="nombre" name="nombre" type="text" autocomplete="name" required>
+      </label>
+      <label for="whatsapp">WhatsApp
+        <span class="ayuda">10 dígitos. Te escribimos para confirmar.</span>
+        <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="81 1234 5678" required>
+      </label>
+      <label for="fecha">Fecha de entrega
+        <span class="ayuda" id="ayuda-fecha"></span>
+        <input id="fecha" name="fecha" type="date" required>
+      </label>
+      <label for="punto" id="etiqueta-punto">Punto de entrega
+        <span class="ayuda" id="ayuda-punto"></span>
+        <span id="campo-punto"></span>
+      </label>
+      <details class="nota">
+        <summary>Agregar una nota</summary>
+        <textarea id="notas" name="notas" aria-label="Nota para tu pedido"></textarea>
+      </details>
+      <div class="trampa" aria-hidden="true"><label for="web">No llenar<input id="web" name="web" type="text" tabindex="-1" autocomplete="off"></label></div>
+      <p class="error" id="error-envio" role="alert" hidden></p>
+      <button type="submit" class="enviar" id="enviar">Enviar pedido</button>
+      <p class="nota-envio" id="nota-envio"></p>
+    </form>
 
-  <div class="resultado" id="resultado" hidden>
-    <p id="resultado-texto" role="status"></p>
-    <textarea id="resultado-pedido" readonly aria-label="Texto de tu pedido"></textarea>
-    <a class="enlace-ig" id="abrir-ig" target="_blank" rel="noopener">Abrir Instagram</a>
-  </div>
+    <div class="respaldo" id="respaldo" hidden>
+      <p id="respaldo-texto" role="status"></p>
+      <textarea id="respaldo-pedido" readonly aria-label="Texto de tu pedido"></textarea>
+      <a class="enviar" id="abrir-ig" target="_blank" rel="noopener">Abrir Instagram</a>
+    </div>
+  </section>
+
+  <section class="listo" id="vista-listo" hidden>
+    <div class="hoja-cabeza">
+      <h2>¡Pedido recibido!</h2>
+      <button type="button" class="cerrar" id="cerrar-listo" aria-label="Cerrar">✕</button>
+    </div>
+    <p class="folio" id="listo-folio"></p>
+    <ul class="resumen" id="listo-resumen"></ul>
+    <p id="listo-instruccion"></p>
+    <dl class="datos-pago" id="listo-pago" hidden></dl>
+    <a class="enviar" id="listo-wa" target="_blank" rel="noopener" hidden>Enviar comprobante por WhatsApp</a>
+    <button type="button" class="secundario" id="otro">Hacer otro pedido</button>
+  </section>
 </dialog>
 
 <script src="productos.js"></script>
@@ -246,6 +279,9 @@
   const dinero = (n) => "$" + n.toLocaleString("es-MX");
   const tamanos = TAMANOS.filter((t) => t.activo).map((t) => t.g);
   const carrito = new Map(); // clave -> { producto, g, precio, cant }
+  const contadores = [];     // funciones que ponen en cero cada contador del menú
+  let token = null;          // identifica un intento de pedido; se renueva si cambia el carrito
+  let enviando = false;
 
   function el(tag, props = {}, ...hijos) {
     const nodo = document.createElement(tag);
@@ -258,24 +294,25 @@
     return nodo;
   }
 
-  const lineas = []; // para refrescar contadores
+  /* ---------- Menú ---------- */
   function pintarMenu() {
     const menu = $("menu");
     for (const cat of CATEGORIAS) {
       const prods = PRODUCTOS.filter((p) => p.categoria === cat.id);
-      if (!prods.length) continue;
-      const seccion = el("section", { class: "categoria", style: "--c:" + cat.color });
-      seccion.append(el("h2", { text: cat.nombre }));
+      const filas = [];
       for (const p of prods) {
         const disponibles = tamanos.filter((g) => typeof p.precios[g] === "number");
         if (!disponibles.length) continue;
         const foto = p.foto
-          ? el("img", { class: "foto", src: p.foto, alt: "", loading: "lazy", width: "64", height: "64" })
+          ? el("img", { class: "foto", src: p.foto, alt: "", loading: "lazy", decoding: "async", width: "64", height: "64" })
           : el("div", { class: "foto foto-vacia", "aria-hidden": "true", text: p.nombre[0] });
-        const info = el("div", {}, el("h3", { text: p.nombre }));
+        const info = el("div", {}, el("h4", { text: p.nombre }));
         for (const g of disponibles) info.append(pintarLinea(p, g));
-        seccion.append(el("article", { class: "producto" }, foto, info));
+        filas.push(el("article", { class: "producto" }, foto, info));
       }
+      if (!filas.length) continue;
+      const seccion = el("section", { class: "categoria" }, el("h3", { text: cat.nombre }));
+      filas.forEach((f) => seccion.append(f));
       menu.append(seccion);
     }
   }
@@ -287,47 +324,52 @@
     const menos = el("button", { type: "button", "aria-label": "Quitar uno: " + p.nombre + " " + g + " g", text: "−", disabled: "" });
     const mas = el("button", { type: "button", class: "mas", "aria-label": "Agregar uno: " + p.nombre + " " + g + " g", text: "+" });
     const fila = el("div", { class: "linea" },
-      el("span", { class: "precio" }, document.createTextNode(g + " g · "), el("b", { text: dinero(precio) })),
+      el("span", { class: "precio" }, el("span", { class: "gramos", text: g + " g" }), el("span", { class: "monto", text: dinero(precio) })),
       el("div", { class: "contador" }, menos, cantidad, mas));
+    const poner = (n) => {
+      if (n === 0) carrito.delete(clave); else carrito.set(clave, { producto: p, g, precio, cant: n });
+      cantidad.textContent = String(n);
+      menos.disabled = n === 0;
+    };
     const cambiar = (d) => {
-      const actual = carrito.get(clave) || { producto: p, g, precio, cant: 0 };
-      actual.cant = Math.max(0, Math.min(99, actual.cant + d));
-      if (actual.cant === 0) carrito.delete(clave); else carrito.set(clave, actual);
-      cantidad.textContent = String(actual.cant);
-      menos.disabled = actual.cant === 0;
+      const actual = carrito.get(clave);
+      poner(Math.max(0, Math.min(99, (actual ? actual.cant : 0) + d)));
+      token = null;
       refrescar();
     };
     menos.addEventListener("click", () => cambiar(-1));
     mas.addEventListener("click", () => cambiar(1));
+    contadores.push(() => poner(0));
     return fila;
   }
 
-  function totales() {
-    let piezas = 0, total = 0;
-    for (const i of carrito.values()) { piezas += i.cant; total += i.cant * i.precio; }
-    return { piezas, total };
+  /* ---------- Totales y resumen ---------- */
+  function lineasDelPedido() {
+    return [...carrito.values()].map((i) => ({ id: i.producto.id, producto: i.producto.nombre, g: i.g, cant: i.cant, precio: i.precio }));
+  }
+  const totalDe = (lineas) => lineas.reduce((s, l) => s + l.cant * l.precio, 0);
+  const piezasDe = (lineas) => lineas.reduce((s, l) => s + l.cant, 0);
+
+  function pintarResumen(lista, lineas) {
+    lista.replaceChildren();
+    for (const l of lineas) {
+      lista.append(el("li", {},
+        el("span", { text: l.cant + " × " + l.producto + " " + l.g + " g" }),
+        el("span", { text: dinero(l.cant * l.precio) })));
+    }
+    lista.append(el("li", { class: "total" }, el("span", { text: "Total" }), el("span", { text: dinero(totalDe(lineas)) })));
   }
 
   function refrescar() {
-    const { piezas, total } = totales();
+    const lineas = lineasDelPedido();
+    const piezas = piezasDe(lineas);
     $("barra").hidden = piezas === 0;
     $("barra-cuenta").textContent = piezas === 1 ? "1 bolsa" : piezas + " bolsas";
-    $("barra-total").textContent = dinero(total);
-    if (piezas === 0 && $("hoja").open) $("hoja").close();
-    pintarResumen();
+    $("barra-total").textContent = dinero(totalDe(lineas));
+    pintarResumen($("resumen"), lineas);
   }
 
-  function pintarResumen() {
-    const lista = $("resumen");
-    lista.replaceChildren();
-    for (const i of carrito.values()) {
-      lista.append(el("li", {},
-        el("span", { text: i.cant + " × " + i.producto.nombre + " " + i.g + " g" }),
-        el("span", { text: dinero(i.cant * i.precio) })));
-    }
-    lista.append(el("li", { class: "total" }, el("span", { text: "Total" }), el("span", { text: dinero(totales().total) })));
-  }
-
+  /* ---------- Utilidades ---------- */
   function fechaISO(d) {
     const z = (n) => String(n).padStart(2, "0");
     return d.getFullYear() + "-" + z(d.getMonth() + 1) + "-" + z(d.getDate());
@@ -336,22 +378,189 @@
     const [a, m, d] = iso.split("-").map(Number);
     return new Date(a, m - 1, d).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
   }
+  function limpiaTel(valor) {
+    let d = String(valor).replace(/\D/g, "");
+    if (d.length === 13 && d.startsWith("521")) d = d.slice(3);
+    else if (d.length === 12 && d.startsWith("52")) d = d.slice(2);
+    return d.length === 10 ? d : "";
+  }
+  function nuevoToken() {
+    return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+  async function copiarTexto(texto) {
+    try { await navigator.clipboard.writeText(texto); return true; } catch (e) { return false; }
+  }
+  function seleccionar(nodo) {
+    const r = document.createRange();
+    r.selectNodeContents(nodo);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
 
-  function textoPedido(datos) {
-    const lineasTxt = [...carrito.values()].map(
-      (i) => "• " + i.cant + " × " + i.producto.nombre + " " + i.g + " g — " + dinero(i.cant * i.precio));
+  /* ---------- Envío ---------- */
+  function textoPedido(datos, lineas) {
     const partes = [
       "Pedido Chilimili",
-      ...lineasTxt,
-      "Total: " + dinero(totales().total),
+      ...lineas.map((l) => "• " + l.cant + " × " + l.producto + " " + l.g + " g — " + dinero(l.cant * l.precio)),
+      "Total: " + dinero(totalDe(lineas)),
       "",
-      "Nombre: " + datos.nombre.trim(),
-      "Contacto: " + datos.contacto.trim(),
-      "Entrega: " + fechaLegible(datos.fecha) + " en " + datos.punto.trim(),
+      "Nombre: " + datos.nombre,
+      "WhatsApp: " + datos.whatsapp,
+      "Entrega: " + fechaLegible(datos.fecha) + " en " + datos.punto,
     ];
-    if (datos.notas.trim()) partes.push("Notas: " + datos.notas.trim());
-    partes.push("Forma de pago: por confirmar");
+    if (datos.notas) partes.push("Notas: " + datos.notas);
     return partes.join("\n");
+  }
+
+  async function mandarALaHoja(cuerpo) {
+    if (CONFIG.pedidosUrl === "demo") {
+      await new Promise((r) => setTimeout(r, 700));
+      return { ok: true, folio: "CM-0001" };
+    }
+    const control = new AbortController();
+    const reloj = setTimeout(() => control.abort(), 20000);
+    try {
+      const r = await fetch(CONFIG.pedidosUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(cuerpo),
+        signal: control.signal,
+      });
+      return await r.json();
+    } finally {
+      clearTimeout(reloj);
+    }
+  }
+
+  function mostrarRespaldo(texto, mensaje) {
+    $("respaldo-pedido").value = texto;
+    $("respaldo-texto").textContent = mensaje;
+    $("respaldo").hidden = false;
+    $("respaldo").scrollIntoView({ block: "nearest" });
+  }
+
+  function mostrarListo(p) {
+    const pago = CONFIG.pago || {};
+    const hayPago = Boolean(pago.banco && pago.clabe);
+    $("listo-folio").textContent = "Folio " + p.folio;
+    pintarResumen($("listo-resumen"), p.lineas);
+    $("listo-instruccion").textContent = hayPago
+      ? "Haz tu transferencia por el monto exacto y envíanos el comprobante por WhatsApp para confirmar tu pedido."
+      : "Te escribimos por WhatsApp para darte los datos de pago y confirmar tu pedido.";
+
+    const caja = $("listo-pago");
+    caja.replaceChildren();
+    caja.hidden = !hayPago;
+    if (hayPago) {
+      const filas = [["Banco", pago.banco], ["Titular", pago.titular], ["CLABE", pago.clabe], ["Monto", dinero(totalDe(p.lineas))], ["Concepto", p.folio]];
+      for (const [nombre, valor] of filas) {
+        if (!valor) continue;
+        const dd = el("dd", {});
+        if (nombre === "CLABE") {
+          const codigo = el("span", { class: "clabe", text: valor });
+          const boton = el("button", { type: "button", class: "copiar", text: "Copiar" });
+          boton.addEventListener("click", async () => {
+            if (await copiarTexto(valor)) {
+              boton.textContent = "Copiada";
+              setTimeout(() => { boton.textContent = "Copiar"; }, 2000);
+            } else {
+              seleccionar(codigo);
+            }
+          });
+          dd.append(codigo, boton);
+        } else {
+          dd.textContent = valor;
+        }
+        caja.append(el("div", {}, el("dt", { text: nombre }), dd));
+      }
+    }
+
+    const wa = $("listo-wa");
+    wa.hidden = !CONFIG.whatsapp;
+    if (CONFIG.whatsapp) {
+      const mensaje = hayPago
+        ? "Hola, soy " + p.nombre + ". Mi pedido " + p.folio + " es por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante de pago."
+        : "Hola, soy " + p.nombre + ". Hice el pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". ¿Me compartes los datos de pago?";
+      wa.href = "https://wa.me/52" + CONFIG.whatsapp + "?text=" + encodeURIComponent(mensaje);
+      wa.textContent = hayPago ? "Enviar comprobante por WhatsApp" : "Escribir por WhatsApp";
+    }
+    $("vista-pedido").hidden = true;
+    $("vista-listo").hidden = false;
+    $("hoja").scrollTop = 0;
+  }
+
+  async function alEnviar(e) {
+    e.preventDefault();
+    if (enviando) return;
+    const f = e.currentTarget;
+    const tel = limpiaTel($("whatsapp").value);
+    $("whatsapp").setCustomValidity(tel ? "" : "Escribe tu número de 10 dígitos.");
+    if (!f.reportValidity()) return;
+    const lineas = lineasDelPedido();
+    if (!lineas.length) return;
+
+    const datos = {
+      nombre: $("nombre").value.trim(),
+      whatsapp: tel,
+      fecha: $("fecha").value,
+      punto: $("punto").value.trim(),
+      notas: $("notas").value.trim(),
+    };
+    $("error-envio").hidden = true;
+    $("respaldo").hidden = true;
+
+    // Sin hoja de pedidos configurada: el pedido sale como mensaje de Instagram.
+    if (!CONFIG.pedidosUrl) {
+      const texto = textoPedido(datos, lineas);
+      const copiado = await copiarTexto(texto);
+      window.open("https://ig.me/m/" + CONFIG.instagram, "_blank", "noopener");
+      mostrarRespaldo(texto, copiado
+        ? "Pedido copiado. Pégalo en el mensaje de Instagram y envíalo."
+        : "No pudimos copiarlo solo. Copia este texto y envíalo por Instagram.");
+      return;
+    }
+
+    token = token || nuevoToken();
+    const boton = $("enviar");
+    enviando = true;
+    boton.disabled = true;
+    boton.textContent = "Enviando…";
+    try {
+      const respuesta = await mandarALaHoja({ token, ...datos, items: lineas, total: totalDe(lineas), web: $("web").value });
+      if (!respuesta || !respuesta.ok) throw new Error("rechazado");
+      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas };
+      carrito.clear();
+      contadores.forEach((poner) => poner());
+      token = null;
+      refrescar();
+      mostrarListo(pedido);
+    } catch (err) {
+      const error = $("error-envio");
+      error.textContent = "No pudimos enviar tu pedido. Revisa tu conexión e inténtalo de nuevo. Si sigue fallando, mándalo por Instagram.";
+      error.hidden = false;
+      mostrarRespaldo(textoPedido(datos, lineas), "Si prefieres, copia tu pedido y envíalo por Instagram.");
+    } finally {
+      enviando = false;
+      boton.disabled = false;
+      boton.textContent = "Enviar pedido";
+    }
+  }
+
+  /* ---------- Arranque ---------- */
+  function pintarCampoPunto() {
+    const puntos = CONFIG.puntos || [];
+    const contenedor = $("campo-punto");
+    if (puntos.length) {
+      const select = el("select", { id: "punto", name: "punto", required: "" },
+        el("option", { value: "", text: "Elige un punto de entrega", disabled: "", selected: "" }));
+      puntos.forEach((p) => select.append(el("option", { value: p, text: p })));
+      contenedor.append(select);
+      $("ayuda-punto").textContent = "Elige dónde recoges tu pedido.";
+    } else {
+      contenedor.append(el("input", { id: "punto", name: "punto", type: "text", autocomplete: "off", required: "" }));
+      $("ayuda-punto").textContent = "¿Dónde te queda bien recibirlos? (" + CONFIG.zona + ")";
+    }
   }
 
   function iniciar() {
@@ -359,42 +568,43 @@
       document.createTextNode("Entregamos en " + CONFIG.zona + ". Pide con "),
       el("strong", { text: CONFIG.diasRecomendados + " días" }),
       document.createTextNode(" de anticipación (mínimo 1)."));
-    const enlace = el("a", { href: "https://instagram.com/" + CONFIG.instagram, text: "@" + CONFIG.instagram });
-    $("pie").append(document.createTextNode("Dudas y pedidos especiales: "), enlace, document.createTextNode(" en Instagram."));
+    $("pie").append(
+      document.createTextNode("Dudas y pedidos especiales: "),
+      el("a", { href: "https://instagram.com/" + CONFIG.instagram, text: "@" + CONFIG.instagram }));
     $("ayuda-fecha").textContent = "Lo ideal es con " + CONFIG.diasRecomendados + " días de anticipación.";
-    $("ayuda-punto").textContent = "¿Dónde te queda bien recibirlos? (" + CONFIG.zona + ")";
+    $("nota-envio").textContent = CONFIG.pedidosUrl
+      ? "Al enviar, tu pedido nos llega al instante. Te mostramos cómo pagar."
+      : "Se copia tu pedido y se abre el mensaje directo de Instagram. Pégalo y envíalo.";
+    $("enviar").textContent = CONFIG.pedidosUrl ? "Enviar pedido" : "Enviar pedido por Instagram";
+    $("abrir-ig").href = "https://ig.me/m/" + CONFIG.instagram;
 
     const manana = new Date();
     manana.setDate(manana.getDate() + 1);
     $("fecha").min = fechaISO(manana);
-    $("abrir-ig").href = "https://ig.me/m/" + CONFIG.instagram;
 
+    pintarCampoPunto();
     pintarMenu();
     refrescar();
 
     const hoja = $("hoja");
-    $("abrir").addEventListener("click", () => { $("resultado").hidden = true; hoja.showModal(); });
+    $("abrir").addEventListener("click", () => { $("respaldo").hidden = true; $("error-envio").hidden = true; hoja.showModal(); });
     $("cerrar").addEventListener("click", () => hoja.close());
-    hoja.addEventListener("click", (e) => { if (e.target === hoja) hoja.close(); });
-
-    $("formulario").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const f = e.currentTarget;
-      if (!f.reportValidity()) return;
-      if (totales().piezas === 0) return;
-      const datos = Object.fromEntries(new FormData(f));
-      const texto = textoPedido(datos);
-      const copia = navigator.clipboard && navigator.clipboard.writeText
-        ? navigator.clipboard.writeText(texto) : Promise.reject();
-      window.open("https://ig.me/m/" + CONFIG.instagram, "_blank", "noopener");
-      const area = $("resultado-pedido");
-      area.value = texto;
-      $("resultado").hidden = false;
-      copia.then(
-        () => { $("resultado-texto").textContent = "Pedido copiado. Pégalo en el mensaje de Instagram y envíalo."; },
-        () => { $("resultado-texto").textContent = "No pudimos copiarlo solo. Copia este texto y envíalo por Instagram."; area.focus(); area.select(); });
-      $("resultado").scrollIntoView({ block: "nearest" });
+    $("cerrar-listo").addEventListener("click", () => hoja.close());
+    $("otro").addEventListener("click", () => hoja.close());
+    hoja.addEventListener("click", (e) => {
+      const r = hoja.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) hoja.close();
     });
+    hoja.addEventListener("close", () => {
+      if (!$("vista-listo").hidden) {
+        $("vista-listo").hidden = true;
+        $("vista-pedido").hidden = false;
+        $("formulario").reset();
+        window.scrollTo({ top: 0 });
+      }
+    });
+    $("whatsapp").addEventListener("input", () => $("whatsapp").setCustomValidity(""));
+    $("formulario").addEventListener("submit", alEnviar);
   }
 
   iniciar();
