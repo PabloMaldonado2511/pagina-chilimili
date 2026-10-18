@@ -267,7 +267,7 @@
     <p id="listo-instruccion"></p>
     <dl class="datos-pago" id="listo-pago" hidden></dl>
     <a class="enviar" id="listo-wa" target="_blank" rel="noopener" hidden>Mandar comprobante por Instagram</a>
-    <p class="nota-envio" id="listo-nota" hidden>Copiamos tu mensaje con el folio. En el chat, pégalo y adjunta la captura de tu transferencia.</p>
+    <p class="nota-envio" id="listo-nota" hidden>Adjunta la captura de tu transferencia y envía. Si el mensaje no aparece escrito, pégalo: ya está copiado.</p>
     <button type="button" class="secundario" id="otro">Hacer otro pedido</button>
   </section>
 </dialog>
@@ -488,7 +488,8 @@
     const ig = $("listo-wa");
     const mensaje = "Hola, soy " + p.nombre + ". Pago del pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante:";
     ig.hidden = !hayPago;
-    ig.href = "https://ig.me/m/" + CONFIG.instagram;
+    // ?text= deja el mensaje escrito (sin enviarlo) cuando Instagram lo respeta; si no, queda copiado.
+    ig.href = "https://ig.me/m/" + CONFIG.instagram + "?text=" + encodeURIComponent(mensaje);
     ig.textContent = "Mandar comprobante por Instagram";
     ig.onclick = () => {
       copiarTexto(mensaje);
