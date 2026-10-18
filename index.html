@@ -266,7 +266,8 @@
     <ul class="resumen" id="listo-resumen"></ul>
     <p id="listo-instruccion"></p>
     <dl class="datos-pago" id="listo-pago" hidden></dl>
-    <a class="enviar" id="listo-wa" target="_blank" rel="noopener" hidden>Enviar comprobante por WhatsApp</a>
+    <a class="enviar" id="listo-wa" target="_blank" rel="noopener" hidden>Mandar comprobante por Instagram</a>
+    <p class="nota-envio" id="listo-nota" hidden>Copiamos tu mensaje con el folio. En el chat, pégalo y adjunta la captura de tu transferencia.</p>
     <button type="button" class="secundario" id="otro">Hacer otro pedido</button>
   </section>
 </dialog>
@@ -448,13 +449,12 @@
     const pago = p.pago || CONFIG.pago || {};
     const cuenta = pago.cuenta || pago.clabe;
     const etiqueta = pago.etiqueta || "CLABE";
-    const telNegocio = p.whatsapp || CONFIG.whatsapp;
     const hayPago = Boolean(pago.banco && cuenta);
     $("listo-folio").textContent = "Folio " + p.folio;
     pintarResumen($("listo-resumen"), p.lineas);
     $("listo-instruccion").textContent = hayPago
-      ? "Haz tu transferencia por el monto exacto y envíanos el comprobante por WhatsApp para confirmar tu pedido."
-      : "Te escribimos por WhatsApp para darte los datos de pago y confirmar tu pedido.";
+      ? "Haz tu transferencia por el monto exacto y mándanos tu comprobante por Instagram para confirmar tu pedido."
+      : "Te escribimos por Instagram para darte los datos de pago y confirmar tu pedido.";
 
     const caja = $("listo-pago");
     caja.replaceChildren();
@@ -483,15 +483,18 @@
       }
     }
 
-    const wa = $("listo-wa");
-    wa.hidden = !telNegocio;
-    if (telNegocio) {
-      const mensaje = hayPago
-        ? "Hola, soy " + p.nombre + ". Mi pedido " + p.folio + " es por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante de pago."
-        : "Hola, soy " + p.nombre + ". Hice el pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". ¿Me compartes los datos de pago?";
-      wa.href = "https://wa.me/52" + telNegocio + "?text=" + encodeURIComponent(mensaje);
-      wa.textContent = hayPago ? "Enviar comprobante por WhatsApp" : "Escribir por WhatsApp";
-    }
+    // Comprobante por Instagram: no deja escribir el mensaje por el cliente,
+    // así que lo copiamos y el cliente solo lo pega y adjunta su captura.
+    const ig = $("listo-wa");
+    const mensaje = "Hola, soy " + p.nombre + ". Pago del pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante:";
+    ig.hidden = !hayPago;
+    ig.href = "https://ig.me/m/" + CONFIG.instagram;
+    ig.textContent = "Mandar comprobante por Instagram";
+    ig.onclick = () => {
+      copiarTexto(mensaje);
+      $("listo-nota").hidden = false;
+    };
+    $("listo-nota").hidden = true;
     $("vista-pedido").hidden = true;
     $("vista-listo").hidden = false;
     $("hoja").scrollTop = 0;
