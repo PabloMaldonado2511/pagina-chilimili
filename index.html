@@ -416,7 +416,10 @@
   async function mandarALaHoja(cuerpo) {
     if (CONFIG.pedidosUrl === "demo") {
       await new Promise((r) => setTimeout(r, 700));
-      return { ok: true, folio: "CM-0001" };
+      return {
+        ok: true, folio: "CM-0001", whatsapp: CONFIG.whatsapp,
+        pago: { ...CONFIG.pago, etiqueta: "Tarjeta", cuenta: CONFIG.pago.clabe, concepto: "ChiliMili " + cuerpo.nombre.split(" ")[0] },
+      };
     }
     const control = new AbortController();
     const reloj = setTimeout(() => control.abort(), 20000);
@@ -441,8 +444,12 @@
   }
 
   function mostrarListo(p) {
-    const pago = CONFIG.pago || {};
-    const hayPago = Boolean(pago.banco && pago.clabe);
+    // Los datos de pago llegan en la respuesta del pedido; CONFIG.pago es solo un respaldo.
+    const pago = p.pago || CONFIG.pago || {};
+    const cuenta = pago.cuenta || pago.clabe;
+    const etiqueta = pago.etiqueta || "CLABE";
+    const telNegocio = p.whatsapp || CONFIG.whatsapp;
+    const hayPago = Boolean(pago.banco && cuenta);
     $("listo-folio").textContent = "Folio " + p.folio;
     pintarResumen($("listo-resumen"), p.lineas);
     $("listo-instruccion").textContent = hayPago
@@ -453,16 +460,16 @@
     caja.replaceChildren();
     caja.hidden = !hayPago;
     if (hayPago) {
-      const filas = [["Banco", pago.banco], ["Titular", pago.titular], ["CLABE", pago.clabe], ["Monto", dinero(totalDe(p.lineas))], ["Concepto", p.folio]];
+      const filas = [["Banco", pago.banco], ["Titular", pago.titular], [etiqueta, cuenta], ["Monto", dinero(totalDe(p.lineas))], ["Concepto", pago.concepto || p.folio]];
       for (const [nombre, valor] of filas) {
         if (!valor) continue;
         const dd = el("dd", {});
-        if (nombre === "CLABE") {
+        if (nombre === etiqueta) {
           const codigo = el("span", { class: "clabe", text: valor });
           const boton = el("button", { type: "button", class: "copiar", text: "Copiar" });
           boton.addEventListener("click", async () => {
             if (await copiarTexto(valor)) {
-              boton.textContent = "Copiada";
+              boton.textContent = "Copiado";
               setTimeout(() => { boton.textContent = "Copiar"; }, 2000);
             } else {
               seleccionar(codigo);
@@ -477,12 +484,12 @@
     }
 
     const wa = $("listo-wa");
-    wa.hidden = !CONFIG.whatsapp;
-    if (CONFIG.whatsapp) {
+    wa.hidden = !telNegocio;
+    if (telNegocio) {
       const mensaje = hayPago
         ? "Hola, soy " + p.nombre + ". Mi pedido " + p.folio + " es por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante de pago."
         : "Hola, soy " + p.nombre + ". Hice el pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". ¿Me compartes los datos de pago?";
-      wa.href = "https://wa.me/52" + CONFIG.whatsapp + "?text=" + encodeURIComponent(mensaje);
+      wa.href = "https://wa.me/52" + telNegocio + "?text=" + encodeURIComponent(mensaje);
       wa.textContent = hayPago ? "Enviar comprobante por WhatsApp" : "Escribir por WhatsApp";
     }
     $("vista-pedido").hidden = true;
@@ -529,7 +536,7 @@
     try {
       const respuesta = await mandarALaHoja({ token, ...datos, items: lineas, total: totalDe(lineas), web: $("web").value });
       if (!respuesta || !respuesta.ok) throw new Error("rechazado");
-      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas };
+      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas, pago: respuesta.pago, whatsapp: respuesta.whatsapp };
       carrito.clear();
       contadores.forEach((poner) => poner());
       token = null;

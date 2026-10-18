@@ -8,7 +8,7 @@
  * Cómo instalarlo (una sola vez):
  * 1. Crea una hoja de Google Sheets nueva y ábrela.
  * 2. Extensiones > Apps Script. Borra lo que haya y pega este archivo completo.
- * 3. Cambia AVISAR_A y DATOS_DE_PAGO aquí mismo, en el editor de Apps Script.
+ * 3. Cambia AVISAR_A, WHATSAPP_NEGOCIO y DATOS_DE_PAGO aquí mismo, en el editor de Apps Script.
  *    No subas tus datos reales a GitHub: el repositorio es público.
  * 4. Implementar > Nueva implementación > Aplicación web.
  *    Ejecutar como: Yo. Quién tiene acceso: Cualquier persona.
@@ -16,10 +16,17 @@
  *    Esa URL va en pedidosUrl dentro de productos.js.
  */
 
-// ---- Edita estos dos datos en el editor de Apps Script ----
+// ---- Edita estos datos en el editor de Apps Script, nunca en GitHub ----
 const AVISAR_A = ["correo1@ejemplo.com", "correo2@ejemplo.com"];
-const DATOS_DE_PAGO = "Banco: (escribe el banco)\nTitular: (escribe el nombre)\nCLABE: (escribe la CLABE)";
-// ------------------------------------------------------------
+const WHATSAPP_NEGOCIO = "8100000000"; // 10 dígitos; recibe los comprobantes
+const DATOS_DE_PAGO = {
+  banco: "(escribe el banco)",
+  titular: "(escribe el nombre)",
+  etiqueta: "Tarjeta", // o "CLABE"
+  cuenta: "(escribe el número)",
+};
+// La página muestra estos datos solo después de que el cliente hace su pedido.
+// ------------------------------------------------------------------------
 
 const HOJA_PEDIDOS = "Pedidos";
 const HOJA_PARTIDAS = "Partidas";
@@ -78,7 +85,7 @@ function registrar(d) {
 
   // Si el cliente reintenta el mismo pedido, devolvemos el folio que ya existe.
   const previo = buscarToken(hojaPedidos, token);
-  if (previo) return { ok: true, folio: previo };
+  if (previo) return respuestaOk(previo, nombre);
 
   const propiedades = PropertiesService.getScriptProperties();
   const numero = Number(propiedades.getProperty("ultimoFolio") || 0) + 1;
@@ -94,7 +101,24 @@ function registrar(d) {
   hojaPartidas.getRange(hojaPartidas.getLastRow() + 1, 1, filas.length, ENCABEZADOS_PARTIDAS.length).setValues(filas);
 
   avisar({ folio: folio, nombre: nombre, whatsapp: whatsapp, fecha: fecha, punto: punto, notas: notas, partidas: partidas, total: total });
-  return { ok: true, folio: folio };
+  return respuestaOk(folio, nombre);
+}
+
+// Los datos de pago viajan solo en la respuesta de un pedido válido.
+function respuestaOk(folio, nombre) {
+  const primerNombre = nombre.split(" ")[0];
+  return {
+    ok: true,
+    folio: folio,
+    whatsapp: WHATSAPP_NEGOCIO,
+    pago: {
+      banco: DATOS_DE_PAGO.banco,
+      titular: DATOS_DE_PAGO.titular,
+      etiqueta: DATOS_DE_PAGO.etiqueta,
+      cuenta: DATOS_DE_PAGO.cuenta,
+      concepto: ("ChiliMili " + primerNombre).slice(0, 30),
+    },
+  };
 }
 
 // Si el correo falla, el pedido ya quedó guardado en la hoja.
@@ -106,7 +130,9 @@ function avisar(p) {
     const mensajeCliente =
       "Hola " + p.nombre + ", recibimos tu pedido " + p.folio + " por $" + p.total +
       " para el " + fechaLarga(p.fecha) + " en " + p.punto + ".\n" +
-      "Para confirmarlo, haz tu transferencia por el monto exacto y mándanos tu comprobante:\n" + DATOS_DE_PAGO;
+      "Para confirmarlo, haz tu transferencia por el monto exacto y mándanos tu comprobante:\n" +
+      "Banco: " + DATOS_DE_PAGO.banco + "\nTitular: " + DATOS_DE_PAGO.titular + "\n" +
+      DATOS_DE_PAGO.etiqueta + ": " + DATOS_DE_PAGO.cuenta + "\nConcepto: ChiliMili " + p.nombre.split(" ")[0];
     const enlace = "https://wa.me/52" + p.whatsapp + "?text=" + encodeURIComponent(mensajeCliente);
     const cuerpo = [
       "Pedido " + p.folio + " por $" + p.total,

@@ -13,11 +13,11 @@ const CONFIG = {
   // Vacío: la página manda el pedido como mensaje de Instagram.
   pedidosUrl: "",
 
-  // WhatsApp del negocio que recibe los comprobantes: 10 dígitos, sin espacios.
-  // Vacío: la pantalla final no muestra el botón de WhatsApp.
+  // WhatsApp y datos de pago NO se escriben aquí: este archivo es público.
+  // Viven en apps-script/pedidos.gs (dentro de Google) y la página los recibe
+  // solo después de que el cliente hace su pedido. Estos campos son un respaldo
+  // para pruebas y se quedan vacíos.
   whatsapp: "",
-
-  // Datos para pagar por transferencia. Sin banco y CLABE no se muestra la caja de pago.
   pago: { banco: "", titular: "", clabe: "" },
 
   // Puntos de entrega, por ejemplo ["Gimnasio X · lunes y miércoles"].
@@ -29,7 +29,7 @@ const CONFIG = {
 // Y el producto tiene precio para ese tamaño.
 // Para vender 200 g: pon su precio en cada producto y cambia activo a true.
 const TAMANOS = [
-  { g: 80, activo: false },
+  { g: 80, activo: true },
   { g: 150, activo: true },
   { g: 200, activo: false },
 ];
