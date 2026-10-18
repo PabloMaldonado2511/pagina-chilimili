@@ -11,7 +11,7 @@ const CONFIG = {
 
   // Dirección de la hoja de pedidos (Google Apps Script), termina en /exec.
   // Vacío: la página manda el pedido como mensaje de Instagram.
-  pedidosUrl: "",
+  pedidosUrl: "https://script.google.com/macros/s/AKfycbz7M69dKZ1WNcUy1I6N5BEnPyLdrRvch1feax4ffU265LceDNQiBS7ABfhscQtcuja4dw/exec",
 
   // WhatsApp y datos de pago NO se escriben aquí: este archivo es público.
   // Viven en apps-script/pedidos.gs (dentro de Google) y la página los recibe
