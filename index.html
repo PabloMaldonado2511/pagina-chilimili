@@ -423,7 +423,7 @@
       };
     }
     const control = new AbortController();
-    const reloj = setTimeout(() => control.abort(), 20000);
+    const reloj = setTimeout(() => control.abort(), 45000);
     try {
       const r = await fetch(CONFIG.pedidosUrl, {
         method: "POST",
@@ -536,7 +536,7 @@
     const boton = $("enviar");
     enviando = true;
     boton.disabled = true;
-    boton.textContent = "Enviando…";
+    boton.textContent = "Enviando… (puede tardar unos segundos)";
     try {
       const respuesta = await mandarALaHoja({ token, ...datos, items: lineas, total: totalDe(lineas), web: $("web").value });
       if (!respuesta || !respuesta.ok) throw new Error("rechazado");
