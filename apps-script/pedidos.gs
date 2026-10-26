@@ -2,13 +2,13 @@
  * Chilimili · Receptor de pedidos (Google Apps Script)
  *
  * Qué hace: recibe cada pedido de la página, lo guarda en la hoja de cálculo
- * (pestañas "Pedidos" y "Partidas"), avisa por correo y deja listo el enlace
- * de WhatsApp para confirmarle al cliente.
+ * (pestañas "Pedidos" y "Partidas") y avisa por correo con el enlace al
+ * Instagram del cliente para confirmarle.
  *
  * Cómo instalarlo (una sola vez):
  * 1. Crea una hoja de Google Sheets nueva y ábrela.
  * 2. Extensiones > Apps Script. Borra lo que haya y pega este archivo completo.
- * 3. Cambia AVISAR_A, WHATSAPP_NEGOCIO y DATOS_DE_PAGO aquí mismo, en el editor de Apps Script.
+ * 3. Cambia AVISAR_A y DATOS_DE_PAGO aquí mismo, en el editor de Apps Script.
  *    No subas tus datos reales a GitHub: el repositorio es público.
  * 4. Implementar > Nueva implementación > Aplicación web.
  *    Ejecutar como: Yo. Quién tiene acceso: Cualquier persona.
@@ -18,7 +18,6 @@
 
 // ---- Edita estos datos en el editor de Apps Script, nunca en GitHub ----
 const AVISAR_A = ["correo1@ejemplo.com", "correo2@ejemplo.com"];
-const WHATSAPP_NEGOCIO = "8100000000"; // 10 dígitos; recibe los comprobantes
 const DATOS_DE_PAGO = {
   banco: "(escribe el banco)",
   titular: "(escribe el nombre)",
@@ -30,7 +29,7 @@ const DATOS_DE_PAGO = {
 
 const HOJA_PEDIDOS = "Pedidos";
 const HOJA_PARTIDAS = "Partidas";
-const ENCABEZADOS_PEDIDOS = ["Folio", "Recibido", "Nombre", "WhatsApp", "Fecha de entrega", "Punto de entrega", "Productos", "Total", "Notas", "Estado", "Token"];
+const ENCABEZADOS_PEDIDOS = ["Folio", "Recibido", "Nombre", "Instagram", "Fecha de entrega", "Punto de entrega", "Productos", "Total", "Notas", "Estado", "Token"];
 const ENCABEZADOS_PARTIDAS = ["Folio", "Fecha de entrega", "Producto", "Gramos", "Cantidad", "Precio", "Subtotal"];
 const COLUMNA_TOKEN = 11;
 const ESTADOS = ["Por pagar", "Pagado", "Entregado", "Cancelado"];
@@ -60,13 +59,13 @@ function registrar(d) {
   if (d.web) return { ok: true, folio: "CM-0000" };
 
   const nombre = texto(d.nombre, 80);
-  const whatsapp = String(d.whatsapp || "").replace(/\D/g, "");
+  const instagram = String(d.instagram || "").trim().replace(/^@+/, "");
   const fecha = String(d.fecha || "");
   const punto = texto(d.punto, 120);
   const notas = texto(d.notas, 300);
   const token = texto(d.token, 64);
   const items = Array.isArray(d.items) ? d.items.slice(0, 40) : [];
-  if (!nombre || whatsapp.length !== 10 || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !punto || !token || !items.length) {
+  if (!nombre || !/^[A-Za-z0-9._]{1,30}$/.test(instagram) || !/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !punto || !token || !items.length) {
     throw new Error("Datos incompletos");
   }
 
@@ -88,19 +87,21 @@ function registrar(d) {
   if (previo) return respuestaOk(previo, nombre);
 
   const propiedades = PropertiesService.getScriptProperties();
+  // Con la hoja vacía (sin pedidos), el folio vuelve a empezar en CM-0001.
+  if (hojaPedidos.getLastRow() <= 1) propiedades.setProperty("ultimoFolio", "0");
   const numero = Number(propiedades.getProperty("ultimoFolio") || 0) + 1;
   propiedades.setProperty("ultimoFolio", String(numero));
   const folio = "CM-" + ("0000" + numero).slice(-4);
 
   const resumen = partidas.map(function (p) { return p.cant + " × " + p.producto + " " + p.g + " g"; }).join("; ");
-  hojaPedidos.appendRow([folio, new Date(), celda(nombre), "'" + whatsapp, fecha, celda(punto), celda(resumen), total, celda(notas), ESTADOS[0], token]);
+  hojaPedidos.appendRow([folio, new Date(), celda(nombre), "@" + instagram, fecha, celda(punto), celda(resumen), total, celda(notas), ESTADOS[0], token]);
 
   const filas = partidas.map(function (p) {
     return [folio, fecha, celda(p.producto), p.g, p.cant, p.precio, p.cant * p.precio];
   });
   hojaPartidas.getRange(hojaPartidas.getLastRow() + 1, 1, filas.length, ENCABEZADOS_PARTIDAS.length).setValues(filas);
 
-  avisar({ folio: folio, nombre: nombre, whatsapp: whatsapp, fecha: fecha, punto: punto, notas: notas, partidas: partidas, total: total });
+  avisar({ folio: folio, nombre: nombre, instagram: instagram, fecha: fecha, punto: punto, notas: notas, partidas: partidas, total: total });
   return respuestaOk(folio, nombre);
 }
 
@@ -110,7 +111,6 @@ function respuestaOk(folio, nombre) {
   return {
     ok: true,
     folio: folio,
-    whatsapp: WHATSAPP_NEGOCIO,
     pago: {
       banco: DATOS_DE_PAGO.banco,
       titular: DATOS_DE_PAGO.titular,
@@ -127,25 +127,18 @@ function avisar(p) {
     const lineas = p.partidas.map(function (x) {
       return "• " + x.cant + " × " + x.producto + " " + x.g + " g — $" + (x.cant * x.precio);
     }).join("\n");
-    const mensajeCliente =
-      "Hola " + p.nombre + ", recibimos tu pedido " + p.folio + " por $" + p.total +
-      " para el " + fechaLarga(p.fecha) + " en " + p.punto + ".\n" +
-      "Para confirmarlo, haz tu transferencia por el monto exacto y mándanos tu comprobante:\n" +
-      "Banco: " + DATOS_DE_PAGO.banco + "\nTitular: " + DATOS_DE_PAGO.titular + "\n" +
-      DATOS_DE_PAGO.etiqueta + ": " + DATOS_DE_PAGO.cuenta + "\nConcepto: ChiliMili " + p.nombre.split(" ")[0];
-    const enlace = "https://wa.me/52" + p.whatsapp + "?text=" + encodeURIComponent(mensajeCliente);
+    const perfil = "https://instagram.com/" + p.instagram;
     const cuerpo = [
       "Pedido " + p.folio + " por $" + p.total,
       "",
       lineas,
       "",
       "Cliente: " + p.nombre,
-      "WhatsApp: " + p.whatsapp,
+      "Instagram: @" + p.instagram + "  " + perfil,
       "Entrega: " + fechaLarga(p.fecha) + " en " + p.punto,
       p.notas ? "Notas: " + p.notas : "",
       "",
-      "Confirmar al cliente por WhatsApp (abre el mensaje ya escrito):",
-      enlace,
+      "Cuando llegue su comprobante por Instagram, cambia el Estado a Pagado en la hoja.",
     ].join("\n");
     MailApp.sendEmail({ to: AVISAR_A.join(","), subject: "Nuevo pedido " + p.folio + " · $" + p.total + " · " + p.nombre, body: cuerpo });
   } catch (err) {
@@ -155,7 +148,10 @@ function avisar(p) {
 
 function obtenerHoja(libro, nombre, encabezados, preparar) {
   let hoja = libro.getSheetByName(nombre);
-  if (hoja) return hoja;
+  if (hoja) {
+    hoja.getRange(1, 1, 1, encabezados.length).setValues([encabezados]);
+    return hoja;
+  }
   const hojas = libro.getSheets();
   if (nombre === HOJA_PEDIDOS && hojas.length === 1 && hojas[0].getLastRow() === 0) {
     hoja = hojas[0].setName(nombre);
@@ -170,7 +166,6 @@ function obtenerHoja(libro, nombre, encabezados, preparar) {
 
 function prepararPedidos(hoja) {
   hoja.getRange("B2:B").setNumberFormat("yyyy-mm-dd hh:mm");
-  hoja.getRange("D2:D").setNumberFormat("@");
   hoja.getRange("E2:E").setNumberFormat("yyyy-mm-dd");
   hoja.getRange("H2:H").setNumberFormat("$#,##0");
   hoja.getRange("J2:J").setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(ESTADOS, true).build());

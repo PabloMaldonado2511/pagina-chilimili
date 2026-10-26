@@ -228,9 +228,9 @@
       <label for="nombre">Nombre
         <input id="nombre" name="nombre" type="text" autocomplete="name" required>
       </label>
-      <label for="whatsapp">WhatsApp
-        <span class="ayuda">10 dígitos. Te escribimos para confirmar.</span>
-        <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="81 1234 5678" required>
+      <label for="instagram">Tu Instagram
+        <span class="ayuda">Por ahí te confirmamos tu pedido.</span>
+        <input id="instagram" name="instagram" type="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="@tuusuario" required>
       </label>
       <label for="fecha">Fecha de entrega
         <span class="ayuda" id="ayuda-fecha"></span>
@@ -379,11 +379,10 @@
     const [a, m, d] = iso.split("-").map(Number);
     return new Date(a, m - 1, d).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
   }
-  function limpiaTel(valor) {
-    let d = String(valor).replace(/\D/g, "");
-    if (d.length === 13 && d.startsWith("521")) d = d.slice(3);
-    else if (d.length === 12 && d.startsWith("52")) d = d.slice(2);
-    return d.length === 10 ? d : "";
+  // Usuario de Instagram: letras, números, punto y guion bajo, máximo 30.
+  function limpiaIg(valor) {
+    const u = String(valor).trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@+/, "").replace(/[/?#].*$/, "");
+    return /^[A-Za-z0-9._]{1,30}$/.test(u) ? u : "";
   }
   function nuevoToken() {
     return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -407,7 +406,7 @@
       "Total: " + dinero(totalDe(lineas)),
       "",
       "Nombre: " + datos.nombre,
-      "WhatsApp: " + datos.whatsapp,
+      "Instagram: @" + datos.instagram,
       "Entrega: " + fechaLegible(datos.fecha) + " en " + datos.punto,
     ];
     if (datos.notas) partes.push("Notas: " + datos.notas);
@@ -418,7 +417,7 @@
     if (CONFIG.pedidosUrl === "demo") {
       await new Promise((r) => setTimeout(r, 700));
       return {
-        ok: true, folio: "CM-0001", whatsapp: CONFIG.whatsapp,
+        ok: true, folio: "CM-0001",
         pago: { ...CONFIG.pago, etiqueta: "Tarjeta", cuenta: CONFIG.pago.clabe, concepto: "ChiliMili " + cuerpo.nombre.split(" ")[0] },
       };
     }
@@ -505,15 +504,15 @@
     e.preventDefault();
     if (enviando) return;
     const f = e.currentTarget;
-    const tel = limpiaTel($("whatsapp").value);
-    $("whatsapp").setCustomValidity(tel ? "" : "Escribe tu número de 10 dígitos.");
+    const ig = limpiaIg($("instagram").value);
+    $("instagram").setCustomValidity(ig ? "" : "Escribe tu usuario de Instagram, por ejemplo @tuusuario.");
     if (!f.reportValidity()) return;
     const lineas = lineasDelPedido();
     if (!lineas.length) return;
 
     const datos = {
       nombre: $("nombre").value.trim(),
-      whatsapp: tel,
+      instagram: ig,
       fecha: $("fecha").value,
       punto: $("punto").value.trim(),
       notas: $("notas").value.trim(),
@@ -540,7 +539,7 @@
     try {
       const respuesta = await mandarALaHoja({ token, ...datos, items: lineas, total: totalDe(lineas), web: $("web").value });
       if (!respuesta || !respuesta.ok) throw new Error("rechazado");
-      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas, pago: respuesta.pago, whatsapp: respuesta.whatsapp };
+      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas, pago: respuesta.pago };
       carrito.clear();
       contadores.forEach((poner) => poner());
       token = null;
@@ -614,7 +613,7 @@
         window.scrollTo({ top: 0 });
       }
     });
-    $("whatsapp").addEventListener("input", () => $("whatsapp").setCustomValidity(""));
+    $("instagram").addEventListener("input", () => $("instagram").setCustomValidity(""));
     $("formulario").addEventListener("submit", alEnviar);
   }
 
