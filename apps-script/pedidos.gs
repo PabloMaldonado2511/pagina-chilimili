@@ -2,8 +2,9 @@
  * Chilimili · Receptor de pedidos (Google Apps Script)
  *
  * Qué hace: recibe cada pedido de la página, lo guarda en la hoja de cálculo
- * (pestañas "Pedidos" y "Partidas") y avisa por correo con el enlace al
- * Instagram del cliente para confirmarle.
+ * (pestañas "Pedidos" y "Partidas") y avisa por correo. También recibe la
+ * captura del comprobante de pago, la guarda en Google Drive (carpeta
+ * "Comprobantes Chilimili"), la liga al pedido y cambia su estado.
  *
  * Cómo instalarlo (una sola vez):
  * 1. Crea una hoja de Google Sheets nueva y ábrela.
@@ -13,6 +14,9 @@
  * 4. Implementar > Nueva implementación > Aplicación web.
  *    Ejecutar como: Yo. Quién tiene acceso: Cualquier persona.
  * 5. Autoriza los permisos que pide Google y copia la URL que termina en /exec.
+ *    Si ya estaba instalado y pegas una versión nueva: elige la función
+ *    "autorizar" arriba, dale Ejecutar una vez y acepta los permisos; luego
+ *    Implementar > Gestionar implementaciones > lápiz > Nueva versión.
  *    Esa URL va en pedidosUrl dentro de productos.js.
  */
 
@@ -29,10 +33,14 @@ const DATOS_DE_PAGO = {
 
 const HOJA_PEDIDOS = "Pedidos";
 const HOJA_PARTIDAS = "Partidas";
-const ENCABEZADOS_PEDIDOS = ["Folio", "Recibido", "Nombre", "Instagram", "Fecha de entrega", "Punto de entrega", "Productos", "Total", "Notas", "Estado", "Token"];
+const ENCABEZADOS_PEDIDOS = ["Folio", "Recibido", "Nombre", "Instagram", "Fecha de entrega", "Punto de entrega", "Productos", "Total", "Notas", "Estado", "Token", "Comprobante"];
 const ENCABEZADOS_PARTIDAS = ["Folio", "Fecha de entrega", "Producto", "Gramos", "Cantidad", "Precio", "Subtotal"];
+const COLUMNA_ESTADO = 10;
 const COLUMNA_TOKEN = 11;
-const ESTADOS = ["Por pagar", "Pagado", "Entregado", "Cancelado"];
+const COLUMNA_COMPROBANTE = 12;
+const ESTADOS = ["Por pagar", "Comprobante recibido", "Pagado", "Entregado", "Cancelado"];
+const TIPOS_COMPROBANTE = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/heic": ".heic", "application/pdf": ".pdf" };
+const MAX_BYTES_COMPROBANTE = 8 * 1024 * 1024;
 
 // Abrir la URL /exec en el navegador sirve para comprobar que el receptor está activo.
 function doGet() {
@@ -45,7 +53,8 @@ function doPost(e) {
   try {
     cerrojo.waitLock(20000);
     bloqueado = true;
-    return salida(registrar(JSON.parse(e.postData.contents)));
+    const d = JSON.parse(e.postData.contents);
+    return salida(d.accion === "comprobante" ? recibirComprobante(d) : registrar(d));
   } catch (err) {
     console.error(err);
     return salida({ ok: false, error: "No se pudo registrar el pedido." });
@@ -94,7 +103,7 @@ function registrar(d) {
   const folio = "CM-" + ("0000" + numero).slice(-4);
 
   const resumen = partidas.map(function (p) { return p.cant + " × " + p.producto + " " + p.g + " g"; }).join("; ");
-  hojaPedidos.appendRow([folio, new Date(), celda(nombre), "@" + instagram, fecha, celda(punto), celda(resumen), total, celda(notas), ESTADOS[0], token]);
+  hojaPedidos.appendRow([folio, new Date(), celda(nombre), "@" + instagram, fecha, celda(punto), celda(resumen), total, celda(notas), ESTADOS[0], token, ""]);
 
   const filas = partidas.map(function (p) {
     return [folio, fecha, celda(p.producto), p.g, p.cant, p.precio, p.cant * p.precio];
@@ -116,7 +125,7 @@ function respuestaOk(folio, nombre) {
       titular: DATOS_DE_PAGO.titular,
       etiqueta: DATOS_DE_PAGO.etiqueta,
       cuenta: DATOS_DE_PAGO.cuenta,
-      concepto: ("ChiliMili " + primerNombre).slice(0, 30),
+      concepto: (folio + " " + primerNombre).slice(0, 30),
     },
   };
 }
@@ -138,7 +147,8 @@ function avisar(p) {
       "Entrega: " + fechaLarga(p.fecha) + " en " + p.punto,
       p.notas ? "Notas: " + p.notas : "",
       "",
-      "Cuando llegue su comprobante por Instagram, cambia el Estado a Pagado en la hoja.",
+      "Referencia de pago: " + p.folio + " " + p.nombre.split(" ")[0],
+      "Cuando el cliente suba su comprobante te llega otro correo.",
     ].join("\n");
     MailApp.sendEmail({ to: AVISAR_A.join(","), subject: "Nuevo pedido " + p.folio + " · $" + p.total + " · " + p.nombre, body: cuerpo });
   } catch (err) {
@@ -150,6 +160,7 @@ function obtenerHoja(libro, nombre, encabezados, preparar) {
   let hoja = libro.getSheetByName(nombre);
   if (hoja) {
     hoja.getRange(1, 1, 1, encabezados.length).setValues([encabezados]);
+    preparar(hoja);
     return hoja;
   }
   const hojas = libro.getSheets();
@@ -174,6 +185,76 @@ function prepararPedidos(hoja) {
 function prepararPartidas(hoja) {
   hoja.getRange("B2:B").setNumberFormat("yyyy-mm-dd");
   hoja.getRange("F2:G").setNumberFormat("$#,##0");
+}
+
+// Recibe la captura del comprobante. Solo se acepta con el token del pedido,
+// que únicamente conoce el celular que lo hizo.
+function recibirComprobante(d) {
+  const folio = String(d.folio || "");
+  const token = texto(d.token, 64);
+  const tipo = String(d.tipo || "");
+  const archivo = String(d.archivo || "");
+  if (!/^CM-\d{4,}$/.test(folio) || !token || !TIPOS_COMPROBANTE[tipo] || !archivo || archivo.length > MAX_BYTES_COMPROBANTE * 1.4) {
+    throw new Error("Comprobante inválido");
+  }
+  const hoja = obtenerHoja(SpreadsheetApp.getActiveSpreadsheet(), HOJA_PEDIDOS, ENCABEZADOS_PEDIDOS, prepararPedidos);
+  const fila = buscarFila(hoja, folio, token);
+  if (!fila) throw new Error("Pedido no encontrado");
+  const bytes = Utilities.base64Decode(archivo);
+  if (!bytes.length || bytes.length > MAX_BYTES_COMPROBANTE) throw new Error("Archivo muy grande");
+
+  const datos = hoja.getRange(fila, 1, 1, ENCABEZADOS_PEDIDOS.length).getValues()[0];
+  const nombre = String(datos[2]).replace(/^'/, "");
+  const nombreArchivo = folio + " " + nombre.split(" ")[0] + TIPOS_COMPROBANTE[tipo];
+  const guardado = carpetaComprobantes().createFile(Utilities.newBlob(bytes, tipo, nombreArchivo));
+  const enlace = guardado.getUrl();
+  hoja.getRange(fila, COLUMNA_COMPROBANTE).setValue(enlace);
+  if (datos[COLUMNA_ESTADO - 1] === ESTADOS[0]) hoja.getRange(fila, COLUMNA_ESTADO).setValue(ESTADOS[1]);
+
+  try {
+    MailApp.sendEmail({
+      to: AVISAR_A.join(","),
+      subject: "Comprobante " + folio + " · $" + datos[7] + " · " + nombre,
+      body: [
+        nombre + " subió su comprobante del pedido " + folio + " por $" + datos[7] + ".",
+        "",
+        "Ver comprobante: " + enlace,
+        "",
+        "Revisa en Banorte que llegó el dinero y cambia el Estado a Pagado en la hoja.",
+      ].join("\n"),
+    });
+  } catch (err) {
+    console.error("No se pudo enviar el aviso del comprobante: " + err);
+  }
+  return { ok: true, folio: folio };
+}
+
+function buscarFila(hoja, folio, token) {
+  const n = hoja.getLastRow() - 1;
+  if (n < 1) return 0;
+  const filas = hoja.getRange(2, 1, n, COLUMNA_TOKEN).getValues();
+  for (let i = filas.length - 1; i >= 0; i--) {
+    if (filas[i][0] === folio && filas[i][COLUMNA_TOKEN - 1] === token) return i + 2;
+  }
+  return 0;
+}
+
+function carpetaComprobantes() {
+  const propiedades = PropertiesService.getScriptProperties();
+  const id = propiedades.getProperty("carpetaComprobantes");
+  if (id) {
+    try { return DriveApp.getFolderById(id); } catch (err) { /* la borraron: se crea otra */ }
+  }
+  const carpeta = DriveApp.createFolder("Comprobantes Chilimili");
+  propiedades.setProperty("carpetaComprobantes", carpeta.getId());
+  return carpeta;
+}
+
+// Ejecútala una vez desde el editor para que Google pida los permisos (hoja, correo y Drive).
+function autorizar() {
+  SpreadsheetApp.getActiveSpreadsheet().getName();
+  MailApp.getRemainingDailyQuota();
+  carpetaComprobantes();
 }
 
 function buscarToken(hoja, token) {

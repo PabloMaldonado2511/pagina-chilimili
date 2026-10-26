@@ -182,6 +182,14 @@
     background: transparent; color: var(--tinta); font: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer;
   }
 
+  .subir { display: grid; gap: 8px; }
+  .subir label.enviar { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .subir.ocupado label.enviar { opacity: 0.6; pointer-events: none; }
+  .subir.hecho label.enviar { background: transparent; border: 2px solid var(--tinta); }
+  .estado-ok { color: #1F7A3A; font-weight: 700; }
+  .oculto-visual { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+  .enlace-ig { display: block; text-align: center; color: var(--tinta); font-weight: 700; padding: 6px 0; }
+
   @media (prefers-reduced-motion: no-preference) {
     .contador button { transition: transform 0.12s ease; }
     .contador button:active:not(:disabled) { transform: scale(0.92); }
@@ -266,8 +274,12 @@
     <ul class="resumen" id="listo-resumen"></ul>
     <p id="listo-instruccion"></p>
     <dl class="datos-pago" id="listo-pago" hidden></dl>
-    <a class="enviar" id="listo-wa" target="_blank" rel="noopener" hidden>Mandar comprobante por Instagram</a>
-    <p class="nota-envio" id="listo-nota" hidden>Adjunta la captura de tu transferencia y envía. Si el mensaje no aparece escrito, pégalo: ya está copiado.</p>
+    <div class="subir" id="listo-subir" hidden>
+      <label class="enviar" for="comprobante" id="etiqueta-comprobante">Subir comprobante</label>
+      <input id="comprobante" class="oculto-visual" type="file" accept="image/*,application/pdf">
+      <p class="nota-envio" id="subir-estado" role="status">Cuando hagas tu transferencia, sube aquí la captura.</p>
+    </div>
+    <a class="enlace-ig" id="listo-ig" target="_blank" rel="noopener">¿Dudas? Escríbenos por Instagram</a>
     <button type="button" class="secundario" id="otro">Hacer otro pedido</button>
   </section>
 </dialog>
@@ -283,6 +295,7 @@
   const contadores = [];     // funciones que ponen en cero cada contador del menú
   let token = null;          // identifica un intento de pedido; se renueva si cambia el carrito
   let enviando = false;
+  let pedidoActual = null;   // folio y token del último pedido, para subir su comprobante
 
   function el(tag, props = {}, ...hijos) {
     const nodo = document.createElement(tag);
@@ -416,9 +429,10 @@
   async function mandarALaHoja(cuerpo) {
     if (CONFIG.pedidosUrl === "demo") {
       await new Promise((r) => setTimeout(r, 700));
+      if (cuerpo.accion) return { ok: true, folio: cuerpo.folio };
       return {
         ok: true, folio: "CM-0001",
-        pago: { ...CONFIG.pago, etiqueta: "Tarjeta", cuenta: CONFIG.pago.clabe, concepto: "ChiliMili " + cuerpo.nombre.split(" ")[0] },
+        pago: { ...CONFIG.pago, etiqueta: "Tarjeta", cuenta: CONFIG.pago.clabe, concepto: "CM-0001 " + cuerpo.nombre.split(" ")[0] },
       };
     }
     const control = new AbortController();
@@ -452,18 +466,19 @@
     $("listo-folio").textContent = "Folio " + p.folio;
     pintarResumen($("listo-resumen"), p.lineas);
     $("listo-instruccion").textContent = hayPago
-      ? "Haz tu transferencia por el monto exacto y mándanos tu comprobante por Instagram para confirmar tu pedido."
+      ? "1. Transfiere el monto exacto y escribe la referencia en el concepto. 2. Sube aquí la captura de tu comprobante."
       : "Te escribimos por Instagram para darte los datos de pago y confirmar tu pedido.";
 
     const caja = $("listo-pago");
     caja.replaceChildren();
     caja.hidden = !hayPago;
     if (hayPago) {
-      const filas = [["Banco", pago.banco], ["Titular", pago.titular], [etiqueta, cuenta], ["Monto", dinero(totalDe(p.lineas))], ["Concepto", pago.concepto || p.folio]];
+      const filas = [["Banco", pago.banco], ["Titular", pago.titular], [etiqueta, cuenta], ["Monto", dinero(totalDe(p.lineas))], ["Referencia", pago.concepto || p.folio]];
+      const copiables = [etiqueta, "Referencia"];
       for (const [nombre, valor] of filas) {
         if (!valor) continue;
         const dd = el("dd", {});
-        if (nombre === etiqueta) {
+        if (copiables.includes(nombre)) {
           const codigo = el("span", { class: "clabe", text: valor });
           const boton = el("button", { type: "button", class: "copiar", text: "Copiar" });
           boton.addEventListener("click", async () => {
@@ -482,22 +497,79 @@
       }
     }
 
-    // Comprobante por Instagram: no deja escribir el mensaje por el cliente,
-    // así que lo copiamos y el cliente solo lo pega y adjunta su captura.
-    const ig = $("listo-wa");
-    const mensaje = "Hola, soy " + p.nombre + ". Pago del pedido " + p.folio + " por " + dinero(totalDe(p.lineas)) + ". Aquí va mi comprobante:";
-    ig.hidden = !hayPago;
-    // ?text= deja el mensaje escrito (sin enviarlo) cuando Instagram lo respeta; si no, queda copiado.
-    ig.href = "https://ig.me/m/" + CONFIG.instagram + "?text=" + encodeURIComponent(mensaje);
-    ig.textContent = "Mandar comprobante por Instagram";
-    ig.onclick = () => {
-      copiarTexto(mensaje);
-      $("listo-nota").hidden = false;
-    };
-    $("listo-nota").hidden = true;
+    pedidoActual = { folio: p.folio, token: p.token };
+    const subir = $("listo-subir");
+    subir.hidden = !hayPago || !p.token;
+    subir.classList.remove("ocupado", "hecho");
+    $("etiqueta-comprobante").textContent = "Subir comprobante";
+    $("subir-estado").textContent = "Cuando hagas tu transferencia, sube aquí la captura.";
+    $("subir-estado").classList.remove("estado-ok", "error");
+    $("comprobante").value = "";
+    $("listo-ig").href = "https://ig.me/m/" + CONFIG.instagram;
     $("vista-pedido").hidden = true;
     $("vista-listo").hidden = false;
     $("hoja").scrollTop = 0;
+  }
+
+  /* ---------- Comprobante ---------- */
+  const leerBase64 = (blob) => new Promise((ok, mal) => {
+    const lector = new FileReader();
+    lector.onload = () => ok(String(lector.result).split(",")[1]);
+    lector.onerror = () => mal(lector.error);
+    lector.readAsDataURL(blob);
+  });
+
+  // Las fotos se achican a 1600 px para que suban rápido; los PDF van tal cual.
+  async function prepararArchivo(archivo) {
+    if (archivo.type === "application/pdf") return { tipo: archivo.type, base64: await leerBase64(archivo), bytes: archivo.size };
+    try {
+      const url = URL.createObjectURL(archivo);
+      const img = await new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = url; });
+      const escala = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const lienzo = document.createElement("canvas");
+      lienzo.width = Math.round(img.naturalWidth * escala);
+      lienzo.height = Math.round(img.naturalHeight * escala);
+      lienzo.getContext("2d").drawImage(img, 0, 0, lienzo.width, lienzo.height);
+      URL.revokeObjectURL(url);
+      const blob = await new Promise((ok) => lienzo.toBlob(ok, "image/jpeg", 0.85));
+      if (blob) return { tipo: "image/jpeg", base64: await leerBase64(blob), bytes: blob.size };
+    } catch (e) { /* si no se puede leer como imagen, se manda el original */ }
+    return { tipo: archivo.type || "image/jpeg", base64: await leerBase64(archivo), bytes: archivo.size };
+  }
+
+  async function subirComprobante() {
+    const archivo = $("comprobante").files[0];
+    if (!archivo || !pedidoActual) return;
+    const caja = $("listo-subir");
+    const estado = $("subir-estado");
+    estado.classList.remove("estado-ok", "error");
+    if (!/^image\//.test(archivo.type) && archivo.type !== "application/pdf" && archivo.type !== "") {
+      estado.textContent = "Sube una foto o captura (o un PDF).";
+      estado.classList.add("error");
+      return;
+    }
+    caja.classList.add("ocupado");
+    $("etiqueta-comprobante").textContent = "Subiendo…";
+    estado.textContent = "Subiendo tu comprobante, no cierres esta pantalla.";
+    try {
+      const listo = await prepararArchivo(archivo);
+      if (listo.bytes > 8 * 1024 * 1024) throw new Error("grande");
+      const r = await mandarALaHoja({ accion: "comprobante", folio: pedidoActual.folio, token: pedidoActual.token, tipo: listo.tipo, archivo: listo.base64 });
+      if (!r || !r.ok) throw new Error("rechazado");
+      caja.classList.add("hecho");
+      $("etiqueta-comprobante").textContent = "Cambiar comprobante";
+      estado.textContent = "¡Comprobante recibido! Lo revisamos y te confirmamos por Instagram.";
+      estado.classList.add("estado-ok");
+    } catch (err) {
+      $("etiqueta-comprobante").textContent = "Intentar de nuevo";
+      estado.textContent = err.message === "grande"
+        ? "El archivo pesa demasiado. Sube una captura de pantalla."
+        : "No pudimos subirlo. Revisa tu conexión e inténtalo otra vez, o mándalo por Instagram.";
+      estado.classList.add("error");
+    } finally {
+      caja.classList.remove("ocupado");
+      $("comprobante").value = "";
+    }
   }
 
   async function alEnviar(e) {
@@ -539,7 +611,7 @@
     try {
       const respuesta = await mandarALaHoja({ token, ...datos, items: lineas, total: totalDe(lineas), web: $("web").value });
       if (!respuesta || !respuesta.ok) throw new Error("rechazado");
-      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas, pago: respuesta.pago };
+      const pedido = { folio: respuesta.folio, nombre: datos.nombre, lineas, pago: respuesta.pago, token };
       carrito.clear();
       contadores.forEach((poner) => poner());
       token = null;
@@ -614,6 +686,7 @@
       }
     });
     $("instagram").addEventListener("input", () => $("instagram").setCustomValidity(""));
+    $("comprobante").addEventListener("change", subirComprobante);
     $("formulario").addEventListener("submit", alEnviar);
   }
 
